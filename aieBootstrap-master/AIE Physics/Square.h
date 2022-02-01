@@ -4,8 +4,10 @@
 class Square : public Rigidbody{
 
 public:
+
 	float height;
 	float length;
+
 protected:
 
 private:

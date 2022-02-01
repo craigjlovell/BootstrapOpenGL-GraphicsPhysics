@@ -5,6 +5,7 @@
 
 #include "PhysicsObject.h"
 #include "PhysicsScene.h"
+#include "Circle.h"
 
 class AIE_PhysicsApp : public aie::Application {
 public:
@@ -22,6 +23,22 @@ protected:
 
 	aie::Renderer2D*	m_2dRenderer;
 	aie::Font*			m_font;
+	Circle*				m_rocket;
 
 	PhysicsScene* m_physicsScene;
+
+
+	float timer;
+
+public:
+
+	//====================================
+	void CreateCircle();
+	void CreatePlane();	
+	void CreateRocket();
+
+	void UpdateRocket();
+
+	void CollisionDetectionTest();
+	//====================================
 };

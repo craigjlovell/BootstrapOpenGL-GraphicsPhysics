@@ -7,7 +7,8 @@ enum ShapeType
 {
 	PLANE = 0,
 	CIRCLE,
-	AABB
+	BOX,
+	SHAPE_COUNT
 };
 
 
@@ -20,8 +21,10 @@ protected:
 public:
 
 	virtual void FixedUpdate(glm::vec2 a_gravity, float a_timeStep) = 0;
-	virtual void Draw() = 0;
+	virtual void MakeGizmo() = 0;
 	virtual void ResetPos() {};
+
+	ShapeType GetShapeID() { return m_shapeID; }
 
 protected:
 
