@@ -1,6 +1,9 @@
 #pragma once
 #include "PhysicsObject.h"
 //one sided object and is concidered to stand infintly along both sides of its edge and backwards from it normal direction
+
+
+class Rigidbody;
 class Plane : public PhysicsObject
 {
 public:
@@ -13,6 +16,8 @@ public:
 	virtual void MakeGizmo();
 	virtual void Debug() {};
 	virtual void ResetPosition() {};
+
+	void ResolvePlaneCollision(Rigidbody* a_rigidbody, glm::vec2 a_contact);
 
 	glm::vec2 GetNormal() { return m_normal; }
 	float GetDistance() { return m_distanceToOrigin; }

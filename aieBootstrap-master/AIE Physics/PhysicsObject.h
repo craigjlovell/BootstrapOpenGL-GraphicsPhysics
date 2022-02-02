@@ -29,6 +29,7 @@ public:
 protected:
 
 	ShapeType m_shapeID;
+	bool m_isKinematic;
 
 private:
 

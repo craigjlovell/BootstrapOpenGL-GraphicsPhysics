@@ -39,13 +39,13 @@ bool AIE_PhysicsApp::startup()
 	// the lower the value tge mroe accurate the simulation will be,
 	// bit will increase processing time required 
 	// if its to high will cause the sim to shutter and reduce the stability
-	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
+	m_physicsScene->SetGravity(glm::vec2(0, 0));
 	m_physicsScene->SetTimeStep(0.1f);
 	
 	//CreateRocket();
-	//CreateCircle();
+	CreateCircle();
 	//CreatePlane();
-	CollisionDetectionTest();
+	//CollisionDetectionTest();
 
 	return true;
 }
@@ -67,8 +67,8 @@ void AIE_PhysicsApp::update(float deltaTime) {
 	m_physicsScene->Update(deltaTime);
 	m_physicsScene->Draw();
 
-	timer += deltaTime;
-	std::cout << "timer" << timer << std::endl;
+	//timer += deltaTime;
+	//std::cout << "timer" << timer << std::endl;
 	//if (timer > 0.2 && m_rocket->GetMass() > 1.f)
 	//{
 	//	m_rocket->SetMass(m_rocket->GetMass() - 1.f);
@@ -111,14 +111,17 @@ void AIE_PhysicsApp::CreateCircle()
 {
 	
 
-	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 10.f, 4.f, glm::vec4(1, 0, 0, 1));
-	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 10.f, 4.f, glm::vec4(0, 1, 0, 1));
+	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 1.70f, 4.f, glm::vec4(1, 1, 1, 1));
+	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 1.60f, 4.f, glm::vec4(0, 1, 0, 1));
 	
 	m_physicsScene->AddActor(ball1);
-	m_physicsScene->AddActor(ball2);
+	//m_physicsScene->AddActor(ball2);
 
-	ball1->ApplyForce(glm::vec2(30, 0));
-	ball2->ApplyForce(glm::vec2(-30, 0));
+	ball1->ApplyForce(glm::vec2(22.22f, -20), ball1->GetPosition());
+	//ball2->ApplyForce(glm::vec2(-30, 0));
+
+	Plane* plane = new Plane(glm::vec2(0,1), - 30);
+	m_physicsScene->AddActor(plane);
 	
 }
 
@@ -141,7 +144,7 @@ void AIE_PhysicsApp::UpdateRocket()
 {
 	Circle* gas = new Circle(glm::vec2(0, -10), glm::vec2(0, 0), 0.5f, 0.5f, glm::vec4(0, 1, 0, 1));	
 	m_physicsScene->AddActor(gas);
-	m_rocket->ApplyForceToActor(gas, glm::vec2(0, -10));
+	//m_rocket->ApplyForceToActor(gas, glm::vec2(0, -10), gas->GetPosition());
 }
 
 void AIE_PhysicsApp::CreateRocket()
