@@ -23,7 +23,7 @@ AIE_PhysicsApp::~AIE_PhysicsApp()
 
 bool AIE_PhysicsApp::startup() 
 {
-	timer = 30;
+	//timer = 30;
 	// increase 2d line count to increase amount we can draw
 	
 	aie::Gizmos::create(255U, 255U, 65535U, 65535U);
@@ -109,16 +109,14 @@ void AIE_PhysicsApp::draw() {
 
 void AIE_PhysicsApp::CreateCircle()
 {
-	
-
-	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 1.70f, 4.f, glm::vec4(1, 1, 1, 1));
+	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 1.70f, 4.f, glm::vec4(1, 1, 0, 1));
 	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 1.60f, 4.f, glm::vec4(0, 1, 0, 1));
 	
 	m_physicsScene->AddActor(ball1);
-	//m_physicsScene->AddActor(ball2);
+	m_physicsScene->AddActor(ball2);
 
 	ball1->ApplyForce(glm::vec2(22.22f, -20), ball1->GetPosition());
-	//ball2->ApplyForce(glm::vec2(-30, 0));
+	ball2->ApplyForce(glm::vec2(-22.22f, -20), ball2->GetPosition());
 
 	Plane* plane = new Plane(glm::vec2(0,1), - 30);
 	m_physicsScene->AddActor(plane);
@@ -142,15 +140,15 @@ void AIE_PhysicsApp::CreatePlane()
 
 void AIE_PhysicsApp::UpdateRocket()
 {
-	Circle* gas = new Circle(glm::vec2(0, -10), glm::vec2(0, 0), 0.5f, 0.5f, glm::vec4(0, 1, 0, 1));	
-	m_physicsScene->AddActor(gas);
+	//Circle* gas = new Circle(glm::vec2(0, -10), glm::vec2(0, 0), 0.5f, 0.5f, glm::vec4(0, 1, 0, 1));	
+	//m_physicsScene->AddActor(gas);
 	//m_rocket->ApplyForceToActor(gas, glm::vec2(0, -10), gas->GetPosition());
 }
 
 void AIE_PhysicsApp::CreateRocket()
 {
-	m_rocket = new Circle(glm::vec2(0, 0), glm::vec2(0, 0), 30.f, 4.f, glm::vec4(0, 0, 1, 1));
-	m_physicsScene->AddActor(m_rocket);
+	//m_rocket = new Circle(glm::vec2(0, 0), glm::vec2(0, 0), 30.f, 4.f, glm::vec4(0, 0, 1, 1));
+	//m_physicsScene->AddActor(m_rocket);
 }
 
 void AIE_PhysicsApp::CollisionDetectionTest()

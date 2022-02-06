@@ -26,9 +26,13 @@ public:
 
 	ShapeType GetShapeID() { return m_shapeID; }
 
+	float GetElasticity() { return m_elasticity; }
+	void SetElasticity(float a_elsticity) { m_elasticity = a_elsticity; }
+
 protected:
 
 	ShapeType m_shapeID;
+	float m_elasticity;
 	bool m_isKinematic;
 
 private:

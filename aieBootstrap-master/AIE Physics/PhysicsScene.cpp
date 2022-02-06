@@ -126,8 +126,10 @@ bool PhysicsScene::Circle2Plane(PhysicsObject* a_circle, PhysicsObject* a_plane)
 		float velocityOutOfThePlane = glm::dot(circle->GetVelocity(), plane->GetNormal());
 		if (intersection > 0 && velocityOutOfThePlane < 0)
 		{
-			// wwe can set the circles responce.
-			circle->ApplyForce(-circle->GetVelocity() * circle->GetMass(), circle->GetPosition());
+			// we can set objects to respond to a plane collision.
+			glm::vec2 contact = circle->GetPosition() + (collisionNormal * -circle->GetRadius());
+			plane->ResolvePlaneCollision(circle, contact);
+			
 			return true;
 		}
 	}
@@ -150,9 +152,7 @@ bool PhysicsScene::Circle2Circle(PhysicsObject* a_circle, PhysicsObject* a_other
 
 		if (penetration > 0)
 		{
-
-
-			circle1->ResolveCollision(circle2);
+			circle1->ResolveCollision(circle2, .5f * (circle1->GetPosition() + circle2->GetPosition()));
 			return true;
 		}
 	}

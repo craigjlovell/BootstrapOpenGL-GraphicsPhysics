@@ -19,7 +19,7 @@ public:
 		std::cout << "Positiom" << m_position.x << ', ' << m_position.y << std::endl;
 	}
 
-	void ResolveCollision(Rigidbody* a_actor2);
+	void ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact, glm::vec2* a_collisionNormal = nullptr);
 
 	virtual bool CheckCollision(PhysicsObject* pOther) = 0;
 
