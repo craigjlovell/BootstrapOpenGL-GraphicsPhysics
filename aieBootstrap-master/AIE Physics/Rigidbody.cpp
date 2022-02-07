@@ -51,11 +51,6 @@ void Rigidbody::ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact, g
 	}
 }
 
-bool Rigidbody::CheckCollision(PhysicsObject* pOther)
-{
-	return false;
-}
-
 void Rigidbody::ApplyForce(glm::vec2 a_force, glm::vec2 a_contact)
 {
 	m_velocity += a_force / GetMass();

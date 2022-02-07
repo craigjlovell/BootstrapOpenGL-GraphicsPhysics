@@ -21,7 +21,6 @@ public:
 
 	void ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact, glm::vec2* a_collisionNormal = nullptr);
 
-	virtual bool CheckCollision(PhysicsObject* pOther) = 0;
 
 	void ApplyForce(glm::vec2 a_force, glm::vec2 a_contact);
 	//void ApplyForceToActor(Rigidbody* a_actor2, glm::vec2 a_force, glm::vec2 a_contact);

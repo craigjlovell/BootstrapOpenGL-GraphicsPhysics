@@ -24,16 +24,3 @@ void Circle::MakeGizmo()
 	aie::Gizmos::add2DCircle(m_position, m_radius, 12, m_colour);
 	aie::Gizmos::add2DLine(m_position, m_position + end, glm::vec4(1,1,1,1));
 }
-
-bool Circle::CheckCollision(PhysicsObject* a_pOther)
-{
-	Circle* pCircle = dynamic_cast<Circle*>(a_pOther);
-	if (pCircle != nullptr)
-	{
-		float dist = glm::distance(m_position, pCircle->m_position);
-		if (m_radius + pCircle->m_radius > dist)
-			return true;
-	}
-
-	return false;
-}

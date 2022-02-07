@@ -1,13 +1,12 @@
 #pragma once
-#include "Rigidbody.h"
-
-class Circle : public Rigidbody
+#include "Circle.h"
+class Player : public Circle
 {
 public:
 
-	Circle(glm::vec2 a_position, glm::vec2 a_velocity, 
+	Player(glm::vec2 a_position, glm::vec2 a_velocity,
 		float a_mass, float a_radius, glm::vec4 a_colour);
-	~Circle();
+	~Player();
 
 	virtual void MakeGizmo();
 
@@ -15,7 +14,7 @@ public:
 	glm::vec4 GetColour() { return m_colour; }
 
 protected:
-	
+
 	float m_radius;
 	glm::vec4 m_colour;
 

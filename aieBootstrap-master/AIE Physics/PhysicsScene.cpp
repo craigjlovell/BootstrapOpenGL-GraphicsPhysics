@@ -103,7 +103,7 @@ bool PhysicsScene::Plane2Plane(PhysicsObject* a_plane, PhysicsObject* a_otherPla
 
 bool PhysicsScene::Plane2Circle(PhysicsObject* a_plane, PhysicsObject* a_circle)
 {
-	return false;
+	return Circle2Plane(a_circle, a_plane);
 }
 
 bool PhysicsScene::Plane2Box(PhysicsObject* a_plane, PhysicsObject* a_box)

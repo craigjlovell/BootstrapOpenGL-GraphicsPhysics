@@ -9,8 +9,9 @@
 #include <Gizmos.h>
 #include <glm/ext.hpp>
 
-#define _use_math_defines
+#define _USE_MATH_DEFINES
 #include <math.h>
+#include "Player.h"
 
 AIE_PhysicsApp::AIE_PhysicsApp() 
 {
@@ -40,7 +41,9 @@ bool AIE_PhysicsApp::startup()
 	// bit will increase processing time required 
 	// if its to high will cause the sim to shutter and reduce the stability
 	m_physicsScene->SetGravity(glm::vec2(0, 0));
-	m_physicsScene->SetTimeStep(0.1f);
+	m_physicsScene->SetTimeStep(0.01f);
+
+	m_player = CreatePlayer(glm::vec2(0, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
 	
 	//CreateRocket();
 	CreateCircle();
@@ -75,7 +78,7 @@ void AIE_PhysicsApp::update(float deltaTime) {
 	//	UpdateRocket();
 	//	timer = 0;
 	//}
-
+	UpdatePlayer(m_player, input);
 
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
@@ -110,13 +113,16 @@ void AIE_PhysicsApp::draw() {
 void AIE_PhysicsApp::CreateCircle()
 {
 	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 1.70f, 4.f, glm::vec4(1, 1, 0, 1));
-	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 1.60f, 4.f, glm::vec4(0, 1, 0, 1));
+	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 1.60f, 4.f, glm::vec4(0, 1, 0, 1));	
 	
 	m_physicsScene->AddActor(ball1);
-	m_physicsScene->AddActor(ball2);
+	m_physicsScene->AddActor(ball2);	
 
 	ball1->ApplyForce(glm::vec2(22.22f, -20), ball1->GetPosition());
 	ball2->ApplyForce(glm::vec2(-22.22f, -20), ball2->GetPosition());
+
+	
+
 
 	Plane* plane = new Plane(glm::vec2(0,1), - 30);
 	m_physicsScene->AddActor(plane);
@@ -151,13 +157,19 @@ void AIE_PhysicsApp::CreateRocket()
 	//m_physicsScene->AddActor(m_rocket);
 }
 
-void AIE_PhysicsApp::CollisionDetectionTest()
+Player* AIE_PhysicsApp::CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour)
 {
-	Circle* ball1 = new Circle(glm::vec2(- 20, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(1, 0, 0, 1));
-	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(0, 1, 0, 1));
-	Plane* plane = new Plane(glm::vec2(0, 1), -30);
+	Player* player = new Player(a_pos, a_vel, a_mass, a_radius, a_colour);
 
-	m_physicsScene->AddActor(ball1);
-	m_physicsScene->AddActor(ball2);
-	m_physicsScene->AddActor(plane);
+	m_physicsScene->AddActor(player);
+
+	return player;
+}
+void AIE_PhysicsApp::UpdatePlayer(Player* a_player, aie::Input* a_input)
+{
+	if (a_input->isKeyDown(aie::INPUT_KEY_W)) a_player->ApplyForce(glm::vec2(0, 1), a_player->GetPosition());
+	if (a_input->isKeyDown(aie::INPUT_KEY_S)) a_player->ApplyForce(glm::vec2(0, -1), a_player->GetPosition());
+	if (a_input->isKeyDown(aie::INPUT_KEY_A)) a_player->ApplyForce(glm::vec2(-1, 0), a_player->GetPosition());
+	if (a_input->isKeyDown(aie::INPUT_KEY_D)) a_player->ApplyForce(glm::vec2(1, 0), a_player->GetPosition());
+	
 }

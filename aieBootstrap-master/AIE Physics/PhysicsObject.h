@@ -20,9 +20,11 @@ protected:
 
 public:
 
+	void Update();
 	virtual void FixedUpdate(glm::vec2 a_gravity, float a_timeStep) = 0;
 	virtual void MakeGizmo() = 0;
 	virtual void ResetPos() {};
+	void Debug();
 
 	ShapeType GetShapeID() { return m_shapeID; }
 
