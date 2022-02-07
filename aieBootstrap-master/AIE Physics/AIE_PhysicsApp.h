@@ -33,18 +33,24 @@ protected:
 
 	Player* m_player;
 
+
 	float timer;
 
 public:
 
 	//====================================
-	void CreateCircle();
-	void CreatePlane();	
+	void RotstionTest();
+
+	void Bounce();
+	
 	void CreateRocket();
 
+	Plane* CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm::vec4 a_colour);
+	Circle* CreateCircle(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force);
 	Player* CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour);
 
 	void UpdatePlayer(Player* a_player, aie::Input* a_input);
+	void CreateBeacor();
 
 	void UpdateRocket();
 

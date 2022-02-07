@@ -9,6 +9,7 @@ class Plane : public PhysicsObject
 public:
 
 	Plane(glm::vec2 a_normal, float a_distanceToOrigin);
+	Plane(glm::vec2 a_normal, float a_distanceToOrigin, glm::vec4 a_colour);
 	Plane();
 	~Plane();
 

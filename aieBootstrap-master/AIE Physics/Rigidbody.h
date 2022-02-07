@@ -1,8 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <vector>
 #include <iostream>
-#include <glm/glm.hpp>
 #include <functional>
 #include "PhysicsObject.h"
 
@@ -11,7 +9,7 @@ class Rigidbody : public PhysicsObject{
 public:
 
 	Rigidbody(ShapeType a_shapeID, glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass);
-	~Rigidbody() {};
+	~Rigidbody();
 	
 	virtual void FixedUpdate(glm::vec2 a_gravity, float a_timeStep);
 	virtual void Debug()
@@ -19,7 +17,7 @@ public:
 		std::cout << "Positiom" << m_position.x << ', ' << m_position.y << std::endl;
 	}
 
-	void ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact, glm::vec2* a_collisionNormal = nullptr);
+	void ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact, glm::vec2* a_collisionNormal = nullptr, float pen = 0);
 
 
 	void ApplyForce(glm::vec2 a_force, glm::vec2 a_contact);

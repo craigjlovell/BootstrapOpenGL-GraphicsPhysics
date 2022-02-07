@@ -1,4 +1,5 @@
 #include "Box.h"
+#include "Rigidbody.h"
 #include <Gizmos.h>
 
 Box::Box(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height) :
@@ -60,3 +61,9 @@ void Box::MakeGizmo()
 	aie::Gizmos::add2DTri(p1, p2, p4, m_colour);
 	aie::Gizmos::add2DTri(p1, p4, p3, m_colour);
 }
+
+bool Box::CheckBoxCorners(const Box& a_box, glm::vec2& a_contact, int& a_numContact, float& a_pen, glm::vec2& a_edgeNormal)
+{
+	return false;
+}
+

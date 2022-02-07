@@ -3,6 +3,9 @@
 #include "Rigidbody.h"
 #include "Circle.h"
 #include "Plane.h"
+#include "Box.h"
+#include <algorithm>
+#include <glm/ext.hpp>
 
 #include <list>
 #include <iostream>
@@ -98,6 +101,7 @@ void PhysicsScene::CheckForCollisions()
 
 bool PhysicsScene::Plane2Plane(PhysicsObject* a_plane, PhysicsObject* a_otherPlane)
 {
+	
 	return false;
 }
 
@@ -108,6 +112,52 @@ bool PhysicsScene::Plane2Circle(PhysicsObject* a_plane, PhysicsObject* a_circle)
 
 bool PhysicsScene::Plane2Box(PhysicsObject* a_plane, PhysicsObject* a_box)
 {
+	Plane* plane = dynamic_cast<Plane*>(a_plane);
+	Box* box = dynamic_cast<Box*>(a_box);
+
+	if (box != nullptr && plane != nullptr)
+	{
+		int numContacts = 0;
+		glm::vec2 contact(0, 0);
+		float contactV = 0;
+
+		glm::vec2 planeOrigin = plane->GetNormal() * plane->GetDistance();
+
+		// check all four corners of the box for if any have touched the plane
+		for (float x = -box->GetExtents().x; x < box->GetWidth(); x += box->GetWidth())
+		{
+			for (float y = -box->GetExtents().y; y < box->GetHeight(); y += box->GetHeight())
+			{
+				//next, grab the position of thge corner in world space
+				glm::vec2 p = box->GetPosition() + x * box->GetLocalX() + y * box->GetLocalY();
+				float distanceFromPlane = glm::dot(p - planeOrigin, plane->GetNormal());
+
+				// this is the total velocity of the box's points in world space
+				glm::vec2 displacement = x * box->GetLocalX() + y * box->GetLocalY();
+				glm::vec2 pointVelocity = box->GetVelocity() + box->GetAngularVelocity() * glm::vec2(-displacement.y, displacement.x);
+
+				//this is the component of the point velocity into the plane
+				float velocityIntoPlane = glm::dot(pointVelocity, plane->GetNormal());
+
+				// while our box is penetrating the plane
+				if (distanceFromPlane < 0 && velocityIntoPlane <= 0)
+				{
+					numContacts++;
+					contact += p;
+					contactV += velocityIntoPlane;
+				}
+			}
+		}
+
+		//we have a hit if greater than 0, typically only 1 to 2 corners will collide
+		if (numContacts > 0)
+		{
+			//todo: accouint for 1 or 2 corners overlapping
+			plane->ResolvePlaneCollision(box, contact / (float)numContacts);
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -152,7 +202,7 @@ bool PhysicsScene::Circle2Circle(PhysicsObject* a_circle, PhysicsObject* a_other
 
 		if (penetration > 0)
 		{
-			circle1->ResolveCollision(circle2, .5f * (circle1->GetPosition() + circle2->GetPosition()));
+			circle1->ResolveCollision(circle2, 0.5f * (circle1->GetPosition() + circle2->GetPosition()));
 			return true;
 		}
 	}
@@ -162,16 +212,54 @@ bool PhysicsScene::Circle2Circle(PhysicsObject* a_circle, PhysicsObject* a_other
 
 bool PhysicsScene::Circle2Box(PhysicsObject* a_circle, PhysicsObject* a_box)
 {
-	return false;
+	return Box2Circle(a_box, a_circle);
 }
 
 bool PhysicsScene::Box2Plane(PhysicsObject* a_box, PhysicsObject* a_plane)
 {
-	return false;
+	return Plane2Box(a_plane, a_box);
 }
 
 bool PhysicsScene::Box2Circle(PhysicsObject* a_box, PhysicsObject* a_circle)
 {
+	Circle* circle = dynamic_cast<Circle*>(a_circle);
+	Box* box = dynamic_cast<Box*>(a_box);
+
+	if (box != nullptr && circle != nullptr)
+	{
+		//transform the circle into the box's coordinates space
+		glm::vec2 circlePosWorld = circle->GetPosition() - box->GetPosition();
+		glm::vec2 circlePosBox = glm::vec2(glm::dot(circlePosWorld, box->GetLocalX()), glm::dot(circlePosBox, box->GetLocalY()));
+
+		// then find the closest point to the circle center on the box
+		// do this by clamping the cords in box-space to the box extents
+		glm::vec2 closestPointOnTheBox = circlePosBox;
+		glm::vec2 extents = box->GetExtents();
+		if (closestPointOnTheBox.x < -extents.x)
+			closestPointOnTheBox.x = -extents.x;
+		if (closestPointOnTheBox.x > extents.x)
+			closestPointOnTheBox.x = extents.x;
+		if (closestPointOnTheBox.y < -extents.y)
+			closestPointOnTheBox.y = -extents.y;
+		if (closestPointOnTheBox.y > extents.y)
+			closestPointOnTheBox.y = extents.y;
+
+		//finally convert back to world cords 
+		glm::vec2 closestPointInBoxWorld = box->GetPosition() + closestPointOnTheBox.x * box->GetLocalX() + closestPointOnTheBox.y * box->GetLocalY();
+
+		glm::vec2 circleToBox = circle->GetPosition() - closestPointInBoxWorld;
+
+		float penetration = circle->GetRadius() - glm::length(circleToBox);
+
+		if (penetration > 0)
+		{
+			glm::vec2 direction = glm::normalize(circleToBox);
+			glm::vec2 contact = closestPointInBoxWorld;
+			box->ResolveCollision(circle, contact, &direction);
+			return true;
+		}
+	}
+
 	return false;
 }
 

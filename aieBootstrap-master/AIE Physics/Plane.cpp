@@ -12,6 +12,15 @@ Plane::Plane(glm::vec2 a_normal, float a_distanceToOrigin) : PhysicsObject(PLANE
 	m_elasticity = 1;
 }
 
+Plane::Plane(glm::vec2 a_normal, float a_distanceToOrigin, glm::vec4 a_colour) : PhysicsObject(PLANE)
+{
+	m_normal = a_normal;
+	m_distanceToOrigin = a_distanceToOrigin;
+	m_colour = glm::vec4(0, 1, 0, 1);
+	m_isKinematic = true;
+	m_elasticity = 1;
+}
+
 Plane::Plane() : PhysicsObject(PLANE)
 {
 	m_normal = glm::vec2(0,1);
