@@ -1,4 +1,13 @@
 #include "Rigidbody.h"
+#include <glm/glm.hpp>
+#include <Gizmos.h>
+#include <glm/ext.hpp>
+#include <iostream>
+#include <math.h>
+
+#include <string>
+#include <stdio.h>
+#include <ctype.h>
 
 Rigidbody::Rigidbody(ShapeType a_shapeID, glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass) : PhysicsObject(a_shapeID)
 {

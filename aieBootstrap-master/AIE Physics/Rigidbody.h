@@ -34,7 +34,7 @@ public:
 
 	float GetAngularVelocity() { return m_angularVelocity; }
 
-	float GetMoment() { return m_moment; }
+	float GetMoment() { return m_isKinematic ? INT_MAX : m_moment; }
 
 	bool GetIsKinematic() { return m_isKinematic; }
 
