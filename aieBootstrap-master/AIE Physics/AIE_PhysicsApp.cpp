@@ -42,16 +42,26 @@ bool AIE_PhysicsApp::startup()
 	// the lower the value tge mroe accurate the simulation will be,
 	// bit will increase processing time required 
 	// if its to high will cause the sim to shutter and reduce the stability
-	m_physicsScene->SetGravity(glm::vec2(0, 0));
+	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
 	m_physicsScene->SetTimeStep(0.01f);
-	RotstionTest();
+	
 
-	m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
+	//m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
+	//m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 1, 4, 8, 4, glm::vec4(.5f, .5f, .5f, 1.f));
+
+	Box* box1 = CreateBox(glm::vec2(20, 0), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 0, 1, 1));
+	Box* box2 = CreateBox(glm::vec2(20, 20), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 1, 1, 1));
+
+	Circle* ball1 = CreateCircle(glm::vec2(20, 30), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	Plane* plane = new Plane(glm::vec2(0, 1), -30);
+	m_physicsScene->AddActor(plane);
+
 	
 	//CreateRocket();
 	//CreateCircle();
 	//CreatePlane();
-	
+	//RotstionTest();
 	//CollisionDetectionTest();
 
 	//Bounce();
@@ -84,9 +94,7 @@ void AIE_PhysicsApp::update(float deltaTime) {
 	//	m_rocket->SetMass(m_rocket->GetMass() - 1.f);
 	//	UpdateRocket();
 	//	timer = 0;
-	//}
-
-	UpdatePlayer(m_player, input);
+	//}	
 
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
@@ -103,8 +111,7 @@ void AIE_PhysicsApp::draw() {
 
 	// draw your stuff here!
 	static float aspectRatio = 16.f / 9.f;
-	aie::Gizmos::draw2D(glm::ortho<float>(-100, 100,
-		-100/aspectRatio, 100/aspectRatio, -1.f, 1.f));
+	aie::Gizmos::draw2D(glm::ortho<float>(-100, 100, -100/aspectRatio, 100/aspectRatio, -1.f, 1.f));
 
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", getFPS());
@@ -120,13 +127,17 @@ void AIE_PhysicsApp::draw() {
 
 void AIE_PhysicsApp::RotstionTest()
 {
-	Circle* ball1 = new Circle(glm::vec2(20, 20), glm::vec2(0, 0), 1.70f, 4.f, glm::vec4(0, 1, 0, 1));
-	m_physicsScene->AddActor(ball1);
-	ball1->ApplyForce(glm::vec2(0.f, -20.f), ball1->GetPosition());
+	//Circle* ball1 = new Circle(glm::vec2(20, 20), glm::vec2(0, 0), 1.70f, 4.f, glm::vec4(0.1, 0, 0.3, 1));
+	//m_physicsScene->AddActor(ball1);
+	//ball1->ApplyForce(glm::vec2(0.f, -20.f), ball1->GetPosition());
 
-	Box* box1 = new Box(glm::vec2(20, 0), glm::vec2(0, 0), 1, 4, 8, 4);
+	Box* box1 = new Box(glm::vec2(20, 0), glm::vec2(0, 0), 0, 4, 8, 4);
 	m_physicsScene->AddActor(box1);
 	box1->ApplyForce(glm::vec2(0.f, -20.f), box1->GetPosition());
+
+	Box* box2 = new Box(glm::vec2(20, 20), glm::vec2(0, 0), 0, 4, 8, 4);
+	m_physicsScene->AddActor(box2);
+	box2->ApplyForce(glm::vec2(0.f, -20.f), box2->GetPosition());
 
 	Plane* plane = new Plane(glm::vec2(0, 1), -30);
 	m_physicsScene->AddActor(plane);
@@ -176,16 +187,6 @@ void AIE_PhysicsApp::CreateRocket()
 	//m_physicsScene->AddActor(m_rocket);
 }
 
-
-void AIE_PhysicsApp::UpdatePlayer(Player* a_player, aie::Input* a_input)
-{
-	if (a_input->isKeyDown(aie::INPUT_KEY_W)) a_player->ApplyForce(glm::vec2(0, 1), a_player->GetPosition());
-	if (a_input->isKeyDown(aie::INPUT_KEY_S)) a_player->ApplyForce(glm::vec2(0, -1), a_player->GetPosition());
-	if (a_input->isKeyDown(aie::INPUT_KEY_A)) a_player->ApplyForce(glm::vec2(-1, 0), a_player->GetPosition());
-	if (a_input->isKeyDown(aie::INPUT_KEY_D)) a_player->ApplyForce(glm::vec2(1, 0), a_player->GetPosition());
-	
-}
-
 Plane* AIE_PhysicsApp::CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm::vec4 a_colour)
 {
 	Plane* plane = new Plane(a_normal, a_distToOrigin, a_colour);
@@ -195,9 +196,18 @@ Plane* AIE_PhysicsApp::CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm
 	return plane;
 }
 
-Player* AIE_PhysicsApp::CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour)
+Player* AIE_PhysicsApp::CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour) // Circle
 {
 	Player* player = new Player(a_pos, a_vel, a_mass, a_radius, a_colour);
+
+	m_physicsScene->AddActor(player);
+
+	return player;
+}
+
+Player* AIE_PhysicsApp::CreatePlayer(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour) // Box
+{
+	Player* player = new Player(a_position, a_velocity, a_rotation, a_mass, a_width, a_height, a_colour);
 
 	m_physicsScene->AddActor(player);
 
@@ -213,5 +223,18 @@ Circle* AIE_PhysicsApp::CreateCircle(glm::vec2 a_pos, glm::vec2 a_vel, float a_m
 	circle->ApplyForce(a_force, circle->GetPosition());
 
 	return circle;
-
 }
+
+Box* AIE_PhysicsApp::CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour)
+{
+	Box* box = new Box(a_position, a_velocity, a_rotation, a_mass, a_width, a_height, a_colour);
+
+	m_physicsScene->AddActor(box);
+
+	box->ApplyForce(glm::vec2(0.f, -20.f), box->GetPosition());
+
+	return box;
+}
+
+
+

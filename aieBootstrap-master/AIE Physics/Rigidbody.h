@@ -40,6 +40,8 @@ public:
 
 	float GetKineticEnergy();
 
+	float ColourChange(float a_colour);
+
 protected:
 
 	glm::vec2 m_position;	

@@ -10,6 +10,7 @@
 class Circle;
 class Plane;
 class Player;
+class Box;
 
 class AIE_PhysicsApp : public aie::Application {
 public:
@@ -47,7 +48,9 @@ public:
 
 	Plane* CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm::vec4 a_colour);
 	Circle* CreateCircle(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force);
+	Box* CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 	Player* CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour);
+	Player* CreatePlayer(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 
 	void UpdatePlayer(Player* a_player, aie::Input* a_input);
 	void CreateBeacor();
