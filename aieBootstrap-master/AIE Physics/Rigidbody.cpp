@@ -21,6 +21,7 @@ Rigidbody::Rigidbody(ShapeType a_shapeID, glm::vec2 a_position, glm::vec2 a_velo
 
 Rigidbody::~Rigidbody()
 {
+
 }
 
 void Rigidbody::FixedUpdate(glm::vec2 a_gravity, float a_timeStep)
@@ -61,7 +62,6 @@ void Rigidbody::ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact,
     }
 }
 
-
 void Rigidbody::ApplyForce(glm::vec2 a_force, glm::vec2 a_contact)
 {
 	m_velocity += a_force / GetMass();
@@ -76,9 +76,10 @@ void Rigidbody::ApplyForce(glm::vec2 a_force, glm::vec2 a_contact)
 
 float Rigidbody::GetKineticEnergy()
 {
-	float totalEnergy = (m_mass * glm::dot(m_velocity, m_velocity)) / 2;
+	//float totalEnergy = (m_mass * glm::dot(m_velocity, m_velocity)) / 2;
+	//return totalEnergy;
 
-	return totalEnergy;
+    return 0.5f * (m_mass * glm::dot(m_velocity, m_velocity) + m_moment * m_angularVelocity * m_angularVelocity);
 }
 
 float Rigidbody::ColourChange(float a_colour)
