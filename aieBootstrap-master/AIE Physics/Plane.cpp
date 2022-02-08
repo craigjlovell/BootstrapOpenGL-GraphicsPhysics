@@ -69,7 +69,7 @@ void Plane::ResolvePlaneCollision(Rigidbody* a_rigidbody, glm::vec2 a_contact)
 	float velocityIntoPlane = glm::dot(vRel, m_normal);
 
 	//perfect elasticity collision [ToBeUpdated]
-	float e = 1;
+	float e = (m_elasticity + a_rigidbody->GetElasticity());
 
 	// find the perpendicular distance so we can apply force at the relative
 	// center of mass, torque= f*r

@@ -64,7 +64,7 @@ void Box::MakeGizmo()
 
 bool Box::CheckBoxCorners(const Box& a_box, glm::vec2& a_contact, int& a_numContact, float& a_pen, glm::vec2& a_edgeNormal)
 {
-	float minX, maxX, minY, maxY;
+	float minX = 0, maxX = 0, minY = 0, maxY = 0;
 	float boxW = a_box.m_extents.x * 2;
 	float boxH = a_box.m_extents.y * 2;
 	int numLocalContacts = 0;

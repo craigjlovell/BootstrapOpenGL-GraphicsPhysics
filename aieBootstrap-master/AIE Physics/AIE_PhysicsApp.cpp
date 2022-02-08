@@ -45,27 +45,7 @@ bool AIE_PhysicsApp::startup()
 	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
 	m_physicsScene->SetTimeStep(0.01f);
 	
-
-	//m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
-	//m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 1, 4, 8, 4, glm::vec4(.5f, .5f, .5f, 1.f));
-
-	Box* box1 = CreateBox(glm::vec2(20, 0), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 0, 1, 1));
-	Box* box2 = CreateBox(glm::vec2(20, 20), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 1, 1, 1));
-
-	Circle* ball1 = CreateCircle(glm::vec2(20, 30), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-
-	Plane* plane = new Plane(glm::vec2(0, 1), -30);
-	m_physicsScene->AddActor(plane);
-
-	
-	//CreateRocket();
-	//CreateCircle();
-	//CreatePlane();
-	//RotstionTest();
-	//CollisionDetectionTest();
-
-	//Bounce();
-	
+	CreateAll();
 
 	return true;
 }
@@ -123,6 +103,30 @@ void AIE_PhysicsApp::draw() {
 
 	// done drawing sprites
 	m_2dRenderer->end();
+}
+
+void AIE_PhysicsApp::CreateAll()
+{
+	m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
+	//m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 1, 4, 8, 4, glm::vec4(1, 1, 1, 1));
+
+	//Box* box1 = CreateBox(glm::vec2(20, 0), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 0, 1, 1));
+	//Box* box2 = CreateBox(glm::vec2(20, 20), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 1, 1, 1));
+	//
+	//Circle* ball1 = CreateCircle(glm::vec2(20, 30), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+	Circle* ball2 = CreateCircle(glm::vec2(20, 40), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	Plane* plane = new Plane(glm::vec2(0, 1), -30);
+	m_physicsScene->AddActor(plane);
+
+
+	//CreateRocket();
+	//CreateCircle();
+	//CreatePlane();
+	//RotstionTest();
+	//CollisionDetectionTest();
+
+	//Bounce();
 }
 
 void AIE_PhysicsApp::RotstionTest()

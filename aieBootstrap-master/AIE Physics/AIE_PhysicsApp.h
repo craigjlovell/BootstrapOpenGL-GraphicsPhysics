@@ -56,6 +56,7 @@ public:
 	void CreateBeacor();
 
 	void UpdateRocket();
+	void CreateAll();
 
 	//====================================
 };

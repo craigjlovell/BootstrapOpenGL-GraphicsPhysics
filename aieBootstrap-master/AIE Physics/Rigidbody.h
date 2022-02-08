@@ -50,6 +50,8 @@ protected:
 	float m_mass;
 	float m_angularVelocity;
 	float m_moment;
+	float m_linearDrag = 0.3f;
+	float m_angularDrag = 0.3f;
 
 private:
 

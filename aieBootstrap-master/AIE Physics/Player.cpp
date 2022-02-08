@@ -43,7 +43,6 @@ void Player::FixedUpdate(glm::vec2 a_gravity, float a_timestep)
 		m_localX = glm::normalize(glm::vec2(cs, sn));
 		m_localY = glm::normalize(glm::vec2(-sn, cs));
 	}
-
 	UpdatePlayer(this, input);
 }
 

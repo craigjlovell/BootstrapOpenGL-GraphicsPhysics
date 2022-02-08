@@ -9,6 +9,7 @@
 
 #include <list>
 #include <iostream>
+#include "Player.h"
 
 PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0, 0))
 {
@@ -67,9 +68,10 @@ void PhysicsScene::Draw()
 typedef bool (*fn)(PhysicsObject*, PhysicsObject*);
 static fn collisionFunctionArray[] =
 {
-	PhysicsScene::Plane2Plane,	PhysicsScene::Plane2Circle,		PhysicsScene::Plane2Box,
-	PhysicsScene::Circle2Plane, PhysicsScene::Circle2Circle,	PhysicsScene::Circle2Box,
-	PhysicsScene::Box2Plane,	PhysicsScene::Box2Circle,		PhysicsScene::Box2Box,
+	PhysicsScene::Plane2Plane,		PhysicsScene::Plane2Circle,		PhysicsScene::Plane2Box,	//PhysicsScene::Plane2Player, 
+	PhysicsScene::Circle2Plane,		PhysicsScene::Circle2Circle,	PhysicsScene::Circle2Box,	//PhysicsScene::Circle2Player,
+	PhysicsScene::Box2Plane,		PhysicsScene::Box2Circle,		PhysicsScene::Box2Box,		//PhysicsScene::Box2Player,
+	//PhysicsScene::Player2Plane,		PhysicsScene::Player2Circle,	PhysicsScene::Player2Box,	//PhysicsScene::Player2Player,
 };
 
 void PhysicsScene::CheckForCollisions()
@@ -114,6 +116,10 @@ bool PhysicsScene::Plane2Box(PhysicsObject* a_plane, PhysicsObject* a_box)
 {
 	Plane* plane = dynamic_cast<Plane*>(a_plane);
 	Box* box = dynamic_cast<Box*>(a_box);
+
+	Player* player = dynamic_cast<Player*>(a_box);
+	if (player != nullptr)
+		box = (Box*)a_box;
 
 	if (box != nullptr && plane != nullptr)
 	{
@@ -166,7 +172,11 @@ bool PhysicsScene::Circle2Plane(PhysicsObject* a_circle, PhysicsObject* a_plane)
 	Circle* circle = dynamic_cast<Circle*>(a_circle);
 	Plane* plane = dynamic_cast<Plane*>(a_plane);
 
-	//if tghis is successful then test for a collision....
+	Player* player = dynamic_cast<Player*>(a_circle);
+	if (player != nullptr)
+		circle = (Circle*)a_circle;
+
+	//if this is successful then test for a collision....
 
 	if (circle != nullptr && plane != nullptr)
 	{
@@ -191,6 +201,10 @@ bool PhysicsScene::Circle2Circle(PhysicsObject* a_circle, PhysicsObject* a_other
 	//tried to cast object to circle to circle
 	Circle* circle1 = dynamic_cast<Circle*>(a_circle);
 	Circle* circle2 = dynamic_cast<Circle*>(a_otherCircle);
+
+	Player* player = dynamic_cast<Player*>(a_circle);
+	if (player != nullptr)
+		circle1 = (Circle*)a_circle;
 
 	//if successful then test for collision
 	if (circle1 != nullptr && circle2 != nullptr)
@@ -224,6 +238,14 @@ bool PhysicsScene::Box2Circle(PhysicsObject* a_box, PhysicsObject* a_circle)
 {
 	Circle* circle = dynamic_cast<Circle*>(a_circle);
 	Box* box = dynamic_cast<Box*>(a_box);
+
+	Player* player = dynamic_cast<Player*>(a_circle);
+	if (player != nullptr )
+		circle = (Circle*)a_circle;
+
+	player = dynamic_cast<Player*>(a_box);
+	if (player != nullptr)
+		box = (Box*)a_box;
 
 	if (box != nullptr && circle != nullptr)
 	{
@@ -267,6 +289,10 @@ bool PhysicsScene::Box2Box(PhysicsObject* a_box, PhysicsObject* a_otherBox)
 {
 	Box* box1 = dynamic_cast<Box*>(a_box);
 	Box* box2 = dynamic_cast<Box*>(a_otherBox);
+
+	Player* player = dynamic_cast<Player*>(a_box);
+	if (player != nullptr)
+		box1 = (Box*)a_box;
 
 	if (box1 != nullptr && box2 != nullptr)
 	{

@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#define MIN_LINEAR_THRESHOLD 0
+#define MIN_ANGULAR_THRESHOLD 0
+
 Rigidbody::Rigidbody(ShapeType a_shapeID, glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass) : PhysicsObject(a_shapeID)
 {
 	m_position = a_position;
@@ -30,6 +33,18 @@ void Rigidbody::FixedUpdate(glm::vec2 a_gravity, float a_timeStep)
 	ApplyForce(a_gravity * GetMass() * a_timeStep, glm::vec2(0, 0));
 
 	m_rotation += m_angularVelocity * a_timeStep;
+
+    m_velocity -= m_velocity * m_linearDrag * a_timeStep;
+    m_angularVelocity -= m_angularVelocity * m_angularDrag * a_timeStep;
+
+    if (length(m_velocity) < MIN_LINEAR_THRESHOLD)
+    {
+        m_velocity = glm::vec2(0, 0);
+    }
+    if (abs(m_angularVelocity) < MIN_ANGULAR_THRESHOLD)
+    {
+        m_angularVelocity = 0;
+    }
 }
 
 void Rigidbody::ResolveCollision(Rigidbody* a_otherActor, glm::vec2 a_contact,
