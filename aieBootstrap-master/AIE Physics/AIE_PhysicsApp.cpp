@@ -14,6 +14,9 @@
 #include <math.h>
 #include "Player.h"
 
+#include "GameStateManager.h"
+#include "IGameState.h"
+
 AIE_PhysicsApp::AIE_PhysicsApp() 
 {
 }
@@ -25,7 +28,6 @@ AIE_PhysicsApp::~AIE_PhysicsApp()
 
 bool AIE_PhysicsApp::startup() 
 {
-
 	//timer = 30;
 	// increase 2d line count to increase amount we can draw
 	
@@ -37,12 +39,15 @@ bool AIE_PhysicsApp::startup()
 	// the following path would be used instead: "./font/consolas.ttf"
 	m_font = new aie::Font("../bin/font/consolas.ttf", 32);
 
+	//m_gameStateManager = new GameStateManager();
 	m_physicsScene = new PhysicsScene();
 
 	// the lower the value tge mroe accurate the simulation will be,
 	// bit will increase processing time required 
 	// if its to high will cause the sim to shutter and reduce the stability
-	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
+	
+	m_physicsScene->SetGravity(glm::vec2(0, 0));
+
 	m_physicsScene->SetTimeStep(0.01f);
 	
 	CreateAll();
@@ -79,6 +84,7 @@ void AIE_PhysicsApp::update(float deltaTime) {
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
+	MouseInputTest(input);
 }
 
 void AIE_PhysicsApp::draw() {
@@ -90,19 +96,31 @@ void AIE_PhysicsApp::draw() {
 	m_2dRenderer->begin();
 
 	// draw your stuff here!
-	static float aspectRatio = 16.f / 9.f;
-	aie::Gizmos::draw2D(glm::ortho<float>(-100, 100, -100/aspectRatio, 100/aspectRatio, -1.f, 1.f));
+	aie::Gizmos::draw2D(glm::ortho<float>(-m_extents, m_extents, -m_extents /m_aspectRatio, m_extents / m_aspectRatio, -1.f, 1.f));
 
 	char fps[32];
 	sprintf_s(fps, 32, "FPS: %i", getFPS());
 	m_2dRenderer->drawText(m_font, fps, 0, 720 - 32);
-
 	
 	// output some text, uses the last used colour
 	m_2dRenderer->drawText(m_font, "Press ESC to quit", 0, 10);
 
 	// done drawing sprites
 	m_2dRenderer->end();
+}
+
+glm::vec2 AIE_PhysicsApp::ScreenToWorld(glm::vec2 a_screenPos)
+{
+	glm::vec2 worldPos = a_screenPos;
+	
+	//move the centre of the screen to (0,0)
+	worldPos.x -= getWindowWidth() / 2;
+	worldPos.y -= getWindowHeight() / 2;
+
+	worldPos.x *= 2.f * m_extents / getWindowWidth();
+	worldPos.y *= 2.f * m_extents / (m_aspectRatio * getWindowHeight());
+
+	return worldPos;
 }
 
 void AIE_PhysicsApp::CreateAll()
@@ -112,12 +130,12 @@ void AIE_PhysicsApp::CreateAll()
 
 	//Box* box1 = CreateBox(glm::vec2(20, 0), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 0, 1, 1));
 	//Box* box2 = CreateBox(glm::vec2(20, 20), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 1, 1, 1));
-	//
+	
 	//Circle* ball1 = CreateCircle(glm::vec2(20, 30), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-	Circle* ball2 = CreateCircle(glm::vec2(20, 40), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+	//Circle* ball2 = CreateCircle(glm::vec2(20, 40), glm::vec2(0, 0), 4, 4, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
 
-	Plane* plane = new Plane(glm::vec2(0, 1), -30);
-	m_physicsScene->AddActor(plane);
+	//Plane* plane = new Plane(glm::vec2(0, 1), -30);
+	//m_physicsScene->AddActor(plane);
 
 
 	//CreateRocket();
@@ -125,8 +143,53 @@ void AIE_PhysicsApp::CreateAll()
 	//CreatePlane();
 	//RotstionTest();
 	//CollisionDetectionTest();
-
+	ObjectTest();
 	//Bounce();
+}
+
+void AIE_PhysicsApp::MouseInputTest(aie::Input* a_input)
+{
+	int xScreen, yScreen;
+	if (a_input->isMouseButtonDown(0))
+	{
+		m_ketPressed = true;		
+		a_input->getMouseXY(&xScreen, &yScreen);
+		glm::vec2 worldPos = ScreenToWorld(glm::vec2(xScreen, yScreen));
+		aie::Gizmos::add2DCircle(worldPos, 5, 32, glm::vec4(0.1f, 0.1f, 0.9f, 1.f));
+	}
+	if (a_input->wasMouseButtonReleased(0))
+	{
+		a_input->getMouseXY(&xScreen, &yScreen);
+		glm::vec2 worldPos = ScreenToWorld(glm::vec2(xScreen, yScreen));
+		Circle* spawn = new Circle(worldPos, glm::vec2(0), 4.f, 4.f, glm::vec4(0.1f, 0.1f, 0.4f, 1.f));
+		m_physicsScene->AddActor(spawn);
+	}
+}
+
+void AIE_PhysicsApp::ObjectTest()
+{
+	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
+	Circle* ball1 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(0, 1, 0, 1));
+	Circle* ball2 = new Circle(glm::vec2(10, -20), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(1, 0, 0, 1));
+	ball2->SetKinematic(true);
+	ball2->SetTrigger(true);
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(ball2);
+
+	m_physicsScene->AddActor(new Plane(glm::vec2(1, 0), -30));
+	m_physicsScene->AddActor(new Plane(glm::vec2(0, 1), -50));
+	m_physicsScene->AddActor(new Plane(glm::vec2(-1, 0), -50));
+
+	ball2->triggerEnter = [=](PhysicsObject* a_other)
+	{
+		std::cout << "Entered:" << a_other << std::endl;
+	};
+	ball2->triggerExit = [=](PhysicsObject* a_other)
+	{
+		std::cout << "Exited:" << a_other << std::endl;
+	};
+
 }
 
 void AIE_PhysicsApp::RotstionTest()

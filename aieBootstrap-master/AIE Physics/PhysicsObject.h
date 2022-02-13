@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <functional>
+#include <list>
 
 // Abstract class
 enum ShapeType
@@ -32,11 +34,21 @@ public:
 	float GetElasticity() { return m_elasticity; }
 	void SetElasticity(float a_elsticity) { m_elasticity = a_elsticity; }
 
+	bool IsTrigger() { return m_isTrigger; }
+	void SetTrigger(bool a_trigger) { m_isTrigger = a_trigger; }
+
+	std::function<void(PhysicsObject*)> triggerEnter;
+	std::function<void(PhysicsObject*)> triggerExit;
+
 protected:
 
 	ShapeType m_shapeID;
 	float m_elasticity;
 	bool m_isKinematic;
+	bool m_isTrigger;
+
+	std::list<PhysicsObject*> m_objectsInside;
+	std::list<PhysicsObject*> m_objectsInsideThisFrame;
 
 private:
 

@@ -1,6 +1,7 @@
 #include "Plane.h"
 #include "Rigidbody.h"
-
+#include "PhysicsScene.h"
+#include <glm/glm.hpp>
 #include <Gizmos.h>
 
 Plane::Plane(glm::vec2 a_normal, float a_distanceToOrigin) : PhysicsObject(PLANE)
@@ -9,6 +10,7 @@ Plane::Plane(glm::vec2 a_normal, float a_distanceToOrigin) : PhysicsObject(PLANE
 	m_distanceToOrigin = a_distanceToOrigin;
 	m_colour = glm::vec4(0, 1, 0, 1);
 	m_isKinematic = true;
+	m_isTrigger = false;
 	m_elasticity = 1;
 }
 
@@ -18,6 +20,7 @@ Plane::Plane(glm::vec2 a_normal, float a_distanceToOrigin, glm::vec4 a_colour) :
 	m_distanceToOrigin = a_distanceToOrigin;
 	m_colour = glm::vec4(0, 1, 0, 1);
 	m_isKinematic = true;
+	m_isTrigger = false;
 	m_elasticity = 1;
 }
 
@@ -27,6 +30,7 @@ Plane::Plane() : PhysicsObject(PLANE)
 	m_distanceToOrigin = 0;
 	m_colour = glm::vec4(1,1,1,1);
 	m_isKinematic = true;
+	m_isTrigger = false;
 	m_elasticity = 1;
 }
 
@@ -69,20 +73,29 @@ void Plane::ResolvePlaneCollision(Rigidbody* a_rigidbody, glm::vec2 a_contact)
 	float velocityIntoPlane = glm::dot(vRel, m_normal);
 
 	//perfect elasticity collision [ToBeUpdated]
-	float e = (m_elasticity + a_rigidbody->GetElasticity());
+	float e = (GetElasticity() + a_rigidbody->GetElasticity())/ 2;
 
 	// find the perpendicular distance so we can apply force at the relative
 	// center of mass, torque= f*r
 	float r = glm::dot(localContact, glm::vec2(m_normal.y, -m_normal.x));
 
-	// determine the 'effective mass' - this is the combination of the moment of inertia and mass
-	// this will tell us how much the contact point velocity will change with the forces applied
 
-	float eMass = 1.f / (1.f / a_rigidbody->GetMass() + (r * r) / a_rigidbody->GetMoment());
+	if (!m_isTrigger && !a_rigidbody->IsTrigger())
+	{
+		// determine the 'effective mass' - this is the combination of the moment of inertia and mass
+		// this will tell us how much the contact point velocity will change with the forces applied
+
+		float eMass = 1.f / (1.f / a_rigidbody->GetMass() + (r * r) / a_rigidbody->GetMoment());
+
+		float j = -(1 + e) * velocityIntoPlane * eMass;
+
+		glm::vec2 force = m_normal * j;
+
+		a_rigidbody->ApplyForce(force, a_contact - a_rigidbody->GetPosition());
+
+		float pen = glm::dot(a_contact, m_normal) - m_distanceToOrigin;
+
+		PhysicsScene::ApplyContactForces(a_rigidbody, nullptr, m_normal, pen);
+	}
 	
-	float j = -(1 + e) * velocityIntoPlane * eMass;
-
-	glm::vec2 force = m_normal * j;
-
-	a_rigidbody->ApplyForce(force, a_contact - a_rigidbody->GetPosition());
 }

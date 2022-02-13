@@ -29,7 +29,7 @@ public:
 	float GetRotation() { return m_rotation; }
 	void SetRotation(const float a_rotation) { m_rotation = a_rotation; }
 
-	float GetMass() { return m_mass; }
+	float GetMass() { return m_isKinematic ? INT_MAX : m_mass; }
 	void SetMass(const float a_mass) { m_mass = a_mass; }
 
 	float GetAngularVelocity() { return m_angularVelocity; }
@@ -37,10 +37,24 @@ public:
 	float GetMoment() { return m_isKinematic ? INT_MAX : m_moment; }
 
 	bool GetIsKinematic() { return m_isKinematic; }
+	void SetKinematic(bool a_state) { m_isKinematic = a_state; }
 
 	float GetKineticEnergy();
 
 	float ColourChange(float a_colour);
+
+	float GetLinearDrag() { return m_linearDrag; }
+	float SetLinearDrag(float a_linearDrag) { return m_linearDrag = a_linearDrag; }
+
+
+	float GetAngularDrag() { return m_angularDrag; }
+	float SetAngularDrag(float a_angularDrag) { return m_angularDrag = a_angularDrag; }
+
+
+	void SetPosition(glm::vec2 a_position) {m_position = a_position; }
+
+	void TriggerEnter(PhysicsObject* a_otherObject);
+	//void TriggerExit(PhysicsObject* a_otherObject);
 
 protected:
 
@@ -50,8 +64,8 @@ protected:
 	float m_mass;
 	float m_angularVelocity;
 	float m_moment;
-	float m_linearDrag = 0.3f;
-	float m_angularDrag = 0.3f;
+	float m_linearDrag;
+	float m_angularDrag;
 
 private:
 
