@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <glm/glm.hpp>
 #include "Rigidbody.h"
 
 class PhysicsObject;
@@ -65,5 +64,4 @@ protected:
 
 
 private:
-
 };

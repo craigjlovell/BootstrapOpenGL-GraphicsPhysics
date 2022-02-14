@@ -8,11 +8,11 @@ public:
 	IGameState() {}
 	virtual ~IGameState() {}
 
-	virtual void Load() {}
-	virtual void Unload() {}
+	virtual bool startup() { return true; }
+	virtual void shutdown() {}
 
-	virtual void Update(float dt) {}
-	virtual void Draw() {}
+	virtual void update(float dt) {}
+	virtual void draw() {}
 
 protected:
 private:

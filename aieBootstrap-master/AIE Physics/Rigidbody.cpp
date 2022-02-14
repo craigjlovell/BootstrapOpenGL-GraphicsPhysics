@@ -1,7 +1,5 @@
 #include "Rigidbody.h"
 #include "PhysicsScene.h"
-#include <glm/glm.hpp>
-#include <Gizmos.h>
 
 #define MIN_LINEAR_THRESHOLD 0.001
 #define MIN_ANGULAR_THRESHOLD 0.01

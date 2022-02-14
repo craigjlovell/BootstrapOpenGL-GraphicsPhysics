@@ -1,6 +1,7 @@
 #include "GameStateManager.h"
 #include "IGameState.h"
 
+
 GameStateManager::GameStateManager()
 {
 
@@ -12,14 +13,33 @@ GameStateManager::~GameStateManager()
 	{
 		if (iter->second != nullptr)
 		{
-			iter->second->Unload();
+			iter->second->shutdown();
 			delete iter->second;
 		}
 	}
-	m_states.clear();
 }
 
-void GameStateManager::Update(float dt)
+bool GameStateManager::startup()
+{
+	return true;
+}
+
+void GameStateManager::shutdown()
+{
+	for (auto iter = m_states.begin(); iter != m_states.end(); iter++)
+	{
+		if (iter->second != nullptr)
+		{
+			iter->second->shutdown();
+			delete iter->second;
+		}
+	}
+
+	m_states.clear();
+	m_stack.clear();
+}
+
+void GameStateManager::update(float dt)
 {
 	for (auto cmd : m_commands)
 		cmd();
@@ -27,15 +47,15 @@ void GameStateManager::Update(float dt)
 
 	for (auto state : m_stack)
 	{
-		state->Update(dt);
+		state->update(dt);
 	}
 }
 
-void GameStateManager::Draw()
+void GameStateManager::draw()
 {
 	for (auto state : m_stack)
 	{
-		state->Draw();
+		state->draw();
 	}
 }
 
@@ -46,7 +66,7 @@ void GameStateManager::SetState(const char* name, IGameState* state)
 
 			if (m_states[name] != nullptr)
 			{
-				m_states[name]->Unload();
+				m_states[name]->shutdown();
 				delete m_states[name];
 			}
 
@@ -54,7 +74,7 @@ void GameStateManager::SetState(const char* name, IGameState* state)
 
 			if (m_states[name] != nullptr)
 			{
-				m_states[name]->Load();
+				m_states[name]->startup();
 			}
 
 		});

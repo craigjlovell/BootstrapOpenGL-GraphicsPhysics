@@ -1,14 +1,10 @@
 #include "PhysicsScene.h"
 #include "PhysicsObject.h"
+
 #include "Rigidbody.h"
 #include "Circle.h"
 #include "Plane.h"
 #include "Box.h"
-#include <algorithm>
-#include <glm/ext.hpp>
-
-#include <list>
-#include <iostream>
 #include "Player.h"
 
 PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0, 0))

@@ -1,7 +1,6 @@
 #include "Plane.h"
 #include "Rigidbody.h"
 #include "PhysicsScene.h"
-#include <glm/glm.hpp>
 #include <Gizmos.h>
 
 Plane::Plane(glm::vec2 a_normal, float a_distanceToOrigin) : PhysicsObject(PLANE)

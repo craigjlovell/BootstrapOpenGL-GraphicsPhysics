@@ -1,26 +1,26 @@
 #pragma once
 
-#include "Application.h"
+#include "App.h"
 #include "Renderer2D.h"
 #include <Input.h>
 
 #include "PhysicsScene.h"
-#include "Rigidbody.h"
+#include "GameStateManager.h"
 
 class Circle;
 class Plane;
 class Player;
 class Box;
+class App;
 
-class GameStateManager;
-
-class AIE_PhysicsApp : public aie::Application {
+class AIE_PhysicsApp
+{
 public:
 
 	AIE_PhysicsApp();
 	virtual ~AIE_PhysicsApp();
 
-	virtual bool startup();
+	virtual bool startup(App* a_app);
 	virtual void shutdown();
 
 	virtual void update(float deltaTime);
@@ -28,20 +28,18 @@ public:
 
 	glm::vec2 ScreenToWorld(glm::vec2 a_screenPos);
 
-	GameStateManager* GetGameStateManager()
-	{
-		return m_gameStateManager;
-	}
+	
 
 protected:
 
 	aie::Renderer2D*	m_2dRenderer;
 	aie::Font*			m_font;
-	//Circle*				m_rocket;
 
+	App* m_app;
 	PhysicsScene* m_physicsScene;
 
 	Player* m_player;
+	Circle* m_circle;
 
 	float timer;
 
@@ -67,6 +65,7 @@ public:
 	void CreateAll();
 
 	void MouseInputTest(aie::Input* a_input);
+	void Pool();
 	bool m_ketPressed = false;
 
 	void ObjectTest();
@@ -74,5 +73,4 @@ public:
 	//====================================
 
 private:
-	GameStateManager* m_gameStateManager = nullptr;
 };
