@@ -21,6 +21,8 @@ public:
 	void ApplyForce(glm::vec2 a_force, glm::vec2 a_contact);
 	//void ApplyForceToActor(Rigidbody* a_actor2, glm::vec2 a_force, glm::vec2 a_contact);
 
+	glm::vec2 ToWorld(glm::vec2 a_localPos);
+
 	glm::vec2 GetPosition() { return m_position; }
 	glm::vec2 GetVelocity() { return m_velocity; }
 
@@ -64,6 +66,10 @@ protected:
 	float m_moment;
 	float m_linearDrag;
 	float m_angularDrag;
+
+	//we will store the local x and y axes of the box based on its angle of rotation 
+	glm::vec2 m_localX;
+	glm::vec2 m_localY;
 
 private:
 

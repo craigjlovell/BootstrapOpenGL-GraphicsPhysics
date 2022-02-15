@@ -85,6 +85,10 @@ void PhysicsScene::CheckForCollisions()
 			int shapeID1 = object1->GetShapeID();
 			int shapeID2 = object2->GetShapeID();
 
+			//we do this check to ensure we do not include a joint into our collision checks
+			if (shapeID1 < 0 || shapeID2 < 0)
+				continue;
+
 			// using the function pointer
 			int functionIDX = (shapeID1 * SHAPE_COUNT) + shapeID2;
 			fn collisionFunctionPTR = collisionFunctionArray[functionIDX];

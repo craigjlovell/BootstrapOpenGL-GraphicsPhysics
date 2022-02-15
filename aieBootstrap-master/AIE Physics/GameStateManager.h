@@ -1,5 +1,6 @@
 #pragma once
 #include "IGameState.h"
+#include "Application.h"
 #include "App.h"
 
 #include <map>
@@ -33,7 +34,7 @@ protected:
 	std::map<const char*, IGameState*> m_states;
 	std::list<IGameState*> m_stack;
 
-	std::list<std::function<void()> > m_commands;
+	std::list<std::function<void()>> m_commands;
 
 private:
 };

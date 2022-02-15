@@ -17,6 +17,7 @@ GameStateManager::~GameStateManager()
 			delete iter->second;
 		}
 	}
+	m_states.clear();
 }
 
 bool GameStateManager::startup()

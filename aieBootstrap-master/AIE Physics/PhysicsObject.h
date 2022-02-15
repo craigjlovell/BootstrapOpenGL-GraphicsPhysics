@@ -7,6 +7,7 @@
 // Abstract class
 enum ShapeType
 {
+	JOINT = -1,
 	PLANE = 0,
 	CIRCLE,
 	BOX,
@@ -26,7 +27,7 @@ public:
 	void Update();
 	virtual void FixedUpdate(glm::vec2 a_gravity, float a_timeStep) = 0;
 	virtual void MakeGizmo() = 0;
-	virtual void ResetPos() {};
+	virtual void ResetPosition() {};
 	void Debug();
 
 	ShapeType GetShapeID() { return m_shapeID; }

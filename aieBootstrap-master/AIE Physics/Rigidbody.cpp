@@ -125,6 +125,12 @@ void Rigidbody::ApplyForce(glm::vec2 a_force, glm::vec2 a_contact)
 	m_angularVelocity += (a_force.y * a_contact.x - a_force.x * a_contact.y) / GetMoment();
 }
 
+glm::vec2 Rigidbody::ToWorld(glm::vec2 a_localPos)
+{
+    return m_position + m_localX * a_localPos.x + 
+        m_localY * a_localPos.y;
+}
+
 //void Rigidbody::ApplyForceToActor(Rigidbody* a_actor2, glm::vec2 a_force, glm::vec2 a_contact)
 //{
 //	ApplyForce(-a_force, a_contact);

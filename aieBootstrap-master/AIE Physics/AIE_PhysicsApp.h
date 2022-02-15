@@ -61,11 +61,12 @@ public:
 	void RotstionTest();
 	void Bounce();
 	void CreateRocket();
+	void SpringTest(int a_amount);
 	void UpdateRocket();
 	void CreateAll();
 
 	void MouseInputTest(aie::Input* a_input);
-	void Pool();
+	void Pool(int a_amount);
 	bool m_ketPressed = false;
 
 	void ObjectTest();

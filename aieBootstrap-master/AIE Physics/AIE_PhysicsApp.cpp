@@ -6,6 +6,7 @@
 #include "Plane.h"
 #include "Player.h"
 #include "Box.h"
+#include "Spring.h"
 
 #include <Gizmos.h>
 
@@ -105,7 +106,7 @@ glm::vec2 AIE_PhysicsApp::ScreenToWorld(glm::vec2 a_screenPos)
 
 void AIE_PhysicsApp::CreateAll()
 {
-	m_player = CreatePlayer(glm::vec2(-40, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
+	//m_player = CreatePlayer(glm::vec2(-40, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
 	//m_player = CreatePlayer(glm::vec2(0, 40), glm::vec2(0, 0), 1, 4, 8, 4, glm::vec4(1, 1, 1, 1));
 
 	//Box* box1 = CreateBox(glm::vec2(20, 0), glm::vec2(0, 0), 0, 4, 8, 4, glm::vec4(1, 0, 1, 1));
@@ -124,7 +125,10 @@ void AIE_PhysicsApp::CreateAll()
 	//RotstionTest();
 	//CollisionDetectionTest();
 	//ObjectTest();
-	Pool();
+	//SpringTest(10);
+
+	Pool(2);
+
 	//Bounce();
 }
 
@@ -147,7 +151,7 @@ void AIE_PhysicsApp::MouseInputTest(aie::Input* a_input)
 	}
 }
 
-void AIE_PhysicsApp::Pool()
+void AIE_PhysicsApp::Pool(int a_amount)
 {
 	Circle* middleTopHole = CreateCircle(glm::vec2(0, 30), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0,0));
 	middleTopHole->SetKinematic(true);
@@ -173,32 +177,92 @@ void AIE_PhysicsApp::Pool()
 	leftBottomHole->SetKinematic(true);
 	leftBottomHole->SetTrigger(true);
 
+	m_player = CreatePlayer(glm::vec2(-40, 0), glm::vec2(0, 0), 4.f, 4.f, glm::vec4(.5f, .5f, .5f, 1.f));
+	m_physicsScene->AddActor(m_player);
+
+	//Circle* ball = CreateCircle(glm::vec2(40, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball1 = CreateCircle(glm::vec2(40, 2.5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball2 = CreateCircle(glm::vec2(40, -2.5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball3 = CreateCircle(glm::vec2(40, -5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball4 = CreateCircle(glm::vec2(40, 5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball6 = CreateCircle(glm::vec2(36, -6), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball7 = CreateCircle(glm::vec2(36, 6), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball8 = CreateCircle(glm::vec2(36, 3), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball9 = CreateCircle(glm::vec2(36, -3), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball11 = CreateCircle(glm::vec2(32, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball12 = CreateCircle(glm::vec2(32, 1), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball13 = CreateCircle(glm::vec2(32, -1), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1.f, 1.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball15 = CreateCircle(glm::vec2(28, -2), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+	//Circle* ball16 = CreateCircle(glm::vec2(28, 2), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f), glm::vec2(0, 0));
+	// Circle* ball18 = CreateCircle(glm::vec2(0, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f), glm::vec2(0, 0));
+
+	Circle* circle = nullptr;
+
+	float circleRadius = 2.f;
+
+	float xStart = 40.f; // 40;
+	float yStart = 10.f; // 5;
+
+	float xOffset = 5.f; // 3;
+	float yOffset = 5.f; // 5;
+	
+	for (int x = 0; x < 5; x++)
+	{
+		for (int y = 0; y < 5 - x; y++)
+		{
+			float xPos = xStart - (xOffset * x);
+			float yPos = 1 + yStart - (yOffset / 2 * x) - (2 / circleRadius + yOffset * y);
+
+			glm::vec2 pos = glm::vec2(xPos, yPos);
+
+			glm::vec4 colour;
+
+			if (x == 2 && y == 1)
+				colour = glm::vec4(1.f, 0.1f, 0.1f, 1);
+			else if (y == 0)
+			{
+				colour = glm::vec4(0.1f, 0.1f, 0.1f, 1);
+			}
+			else
+			{
+				colour = glm::vec4(0, 0, 1, 1);
+			}
+
+			circle = CreateCircle(pos, glm::vec2(0), 2.f, circleRadius, colour, glm::vec2(0, 0));
+			//m_physicsScene->AddActor(circle);
+		}
+	}
+
+	middleTopHole->triggerExit = [=](PhysicsObject* a_other)
+	{
+		m_physicsScene->RemoveActor(a_other);
+	};
+	rightTopHole->triggerExit = [=](PhysicsObject* a_other)
+	{
+		m_physicsScene->RemoveActor(a_other);
+	};
+	leftTopHole->triggerExit = [=](PhysicsObject* a_other)
+	{
+		m_physicsScene->RemoveActor(a_other);
+	};
 	middleBottomHole->triggerExit = [=](PhysicsObject* a_other)
 	{
 		m_physicsScene->RemoveActor(a_other);
 	};
+	rightBottomHole->triggerExit = [=](PhysicsObject* a_other)
+	{
+		m_physicsScene->RemoveActor(a_other);
+	};
+	leftBottomHole->triggerExit = [=](PhysicsObject* a_other)
+	{
+		m_physicsScene->RemoveActor(a_other);
+	};
+	
 
-	Circle* ball1 = new Circle(glm::vec2(40, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f));
-	m_physicsScene->AddActor(ball1);
 
-	m_physicsScene->AddActor(new Circle(glm::vec2(40, 2.5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(40, -2.5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(40, -5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(40, 5), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f)));
+	
 
-	m_physicsScene->AddActor(new Circle(glm::vec2(36, -6), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(36, 6), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(36, 3), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(36, -3), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f)));
-
-	m_physicsScene->AddActor(new Circle(glm::vec2(32, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(32, 1), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(32, -1), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1.f, 1.f, 1.f, 1.f)));
-
-	m_physicsScene->AddActor(new Circle(glm::vec2(28, -2), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
-	m_physicsScene->AddActor(new Circle(glm::vec2(28, 2), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 1.f, 0.f, 1.f)));
-
-	m_physicsScene->AddActor(new Circle(glm::vec2(24, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(0.f, 0.f, 1.f, 1.f)));
+	
 
 	Box* topleft = new Box(glm::vec2(-25, 35), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(1.f,1.f,1.f,1.f));
 	m_physicsScene->AddActor(topleft);
@@ -324,6 +388,27 @@ void AIE_PhysicsApp::CreateRocket()
 	//m_physicsScene->AddActor(m_rocket);
 }
 
+void AIE_PhysicsApp::SpringTest(int a_amount)
+{
+	Circle* prev = nullptr;
+	for (int i = 0; i < a_amount; i++)
+	{
+		//Spawn a new Circle below the last.
+		Circle* circle = new Circle(glm::vec2(i * 3, 30 - i * 5), glm::vec2(0), 10,2,glm::vec4(0,0,1,1));
+		if (i == 0)
+			circle->SetKinematic(true);
+		m_physicsScene->AddActor(circle);
+		if (prev)
+			m_physicsScene->AddActor(new Spring(circle, prev, 10, 500));
+		prev = circle;
+		
+	}
+
+	Box* box = new Box(glm::vec2(0, -20), glm::vec2(0), 0.3f, 20, glm::vec2(8, 2), glm::vec4(0, 1, 1, 1));
+	box->SetKinematic(true);
+	m_physicsScene->AddActor(box);
+}
+
 Plane* AIE_PhysicsApp::CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm::vec4 a_colour)
 {
 	Plane* plane = new Plane(a_normal, a_distToOrigin, a_colour);
@@ -368,7 +453,7 @@ Box* AIE_PhysicsApp::CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float
 
 	m_physicsScene->AddActor(box);
 
-	//box->ApplyForce(glm::vec2(0.f, -20.f), box->GetPosition());
+	box->ApplyForce(glm::vec2(0.f, -20.f), box->GetPosition());
 
 	return box;
 }

@@ -33,7 +33,7 @@ bool App::startup()
 
 void App::shutdown()
 {
-
+	m_gameStateManager->shutdown();
 	delete m_font;
 	delete m_2dRenderer;
 	delete m_gameStateManager;

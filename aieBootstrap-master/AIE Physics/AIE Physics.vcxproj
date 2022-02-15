@@ -181,6 +181,7 @@
     <ClCompile Include="Plane.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Rigidbody.cpp" />
+    <ClCompile Include="Spring.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AIE_PhysicsApp.h" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Plane.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Rigidbody.h" />
+    <ClInclude Include="Spring.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
