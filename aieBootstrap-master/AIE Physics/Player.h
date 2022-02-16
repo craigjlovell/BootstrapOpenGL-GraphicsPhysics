@@ -9,7 +9,7 @@ public:
 	Player(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 	~Player();
 
-	void FixedUpdate(glm::vec2 a_gravity, float a_timestep);
+	virtual void FixedUpdate(glm::vec2 a_gravity, float a_timestep);
 
 	virtual void MakeGizmo();
 

@@ -30,9 +30,15 @@ void Spring::FixedUpdate(glm::vec2 a_gravity, float a_timeStep)
 
 	// if f = -kX -bv
 	glm::vec2 force = direction * m_springCoefficient * (m_restLength - length) - m_damping * relativeVelocity;
+
+	// cap the spring force to 1000 N to prevent numerical instability 
+	const float threshold = 1000.0f;
+	float forceMag = glm::length(force);
+
+	if (forceMag > threshold) force *= threshold / forceMag;
+
 	m_actor1->ApplyForce(-force * a_timeStep, p1 - m_actor1->GetPosition());
 	m_actor2->ApplyForce(force * a_timeStep, p2 - m_actor2->GetPosition());
-
 }
 
 void Spring::MakeGizmo()

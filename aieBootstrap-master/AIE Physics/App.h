@@ -10,16 +10,14 @@ class App : public aie::Application
 public:
 
 	App();
-	virtual ~App();
+	~App();
 	virtual bool startup();
 	virtual void shutdown();
-	virtual void update(float deltaTime);
-	virtual void draw();
 
-	GameStateManager* GetGameStateManager()
-	{
-		return m_gameStateManager;
-	}
+	void update(float deltaTime);
+	void draw();
+
+	GameStateManager* GetGameStateManager(){ return m_gameStateManager; }
 
 protected:
 

@@ -17,7 +17,6 @@ GameStateManager::~GameStateManager()
 			delete iter->second;
 		}
 	}
-	m_states.clear();
 }
 
 bool GameStateManager::startup()
@@ -46,25 +45,20 @@ void GameStateManager::update(float dt)
 		cmd();
 	m_commands.clear();
 
-	for (auto state : m_stack)
-	{
-		state->update(dt);
-	}
+	m_stack.back()->update(dt);
 }
 
 void GameStateManager::draw()
 {
 	for (auto state : m_stack)
-	{
 		state->draw();
-	}
+	
 }
 
 void GameStateManager::SetState(const char* name, IGameState* state)
 {
 	m_commands.push_back([=]()
 		{
-
 			if (m_states[name] != nullptr)
 			{
 				m_states[name]->shutdown();
@@ -74,9 +68,8 @@ void GameStateManager::SetState(const char* name, IGameState* state)
 			m_states[name] = state;
 
 			if (m_states[name] != nullptr)
-			{
 				m_states[name]->startup();
-			}
+			
 
 		});
 }

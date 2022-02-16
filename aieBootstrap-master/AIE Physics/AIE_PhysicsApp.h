@@ -7,11 +7,12 @@
 #include "PhysicsScene.h"
 #include "GameStateManager.h"
 
+class App;
 class Circle;
 class Plane;
 class Player;
 class Box;
-class App;
+
 
 class AIE_PhysicsApp
 {
@@ -66,10 +67,12 @@ public:
 	void CreateAll();
 
 	void MouseInputTest(aie::Input* a_input);
-	void Pool(int a_amount);
+	void Pool();
 	bool m_ketPressed = false;
 
 	void ObjectTest();
+
+	void SoftBodyTest();
 
 	//====================================
 

@@ -47,7 +47,7 @@ public:
 	static bool Box2Circle(PhysicsObject* a_box, PhysicsObject* a_circle);
 	static bool Box2Box(PhysicsObject* a_box, PhysicsObject* a_otherBox);
 	//static bool Box2Player(PhysicsObject* a_box, PhysicsObject* a_player);
-	//
+	
 	//static bool Player2Plane(PhysicsObject* a_player, PhysicsObject* a_plane);
 	//static bool Player2Circle(PhysicsObject* a_player, PhysicsObject* a_circle);
 	//static bool Player2Box(PhysicsObject* a_player, PhysicsObject* a_box);

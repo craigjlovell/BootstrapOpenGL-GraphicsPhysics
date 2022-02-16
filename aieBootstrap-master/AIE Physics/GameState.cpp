@@ -30,14 +30,13 @@ bool GameState::startup()
 
 void GameState::shutdown()
 {
+	m_physApp->shutdown();
+	delete m_physApp;
+	m_physApp = nullptr;
+
 	delete m_font;
 	delete m_2dRenderer;
 	std::cout << "Unloading Menu" << std::endl;
-
-	m_physApp->shutdown();
-
-	delete m_physApp;
-	m_physApp = nullptr;
 
 }
 
