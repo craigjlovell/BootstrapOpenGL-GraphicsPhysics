@@ -9,14 +9,7 @@ GameStateManager::GameStateManager()
 
 GameStateManager::~GameStateManager()
 {
-	for (auto iter = m_states.begin(); iter != m_states.end(); iter++)
-	{
-		if (iter->second != nullptr)
-		{
-			iter->second->shutdown();
-			delete iter->second;
-		}
-	}
+	
 }
 
 bool GameStateManager::startup()
@@ -34,9 +27,7 @@ void GameStateManager::shutdown()
 			delete iter->second;
 		}
 	}
-
 	m_states.clear();
-	m_stack.clear();
 }
 
 void GameStateManager::update(float dt)
