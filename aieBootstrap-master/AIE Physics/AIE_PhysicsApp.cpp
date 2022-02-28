@@ -252,6 +252,7 @@ void AIE_PhysicsApp::Pool()
 			if (x == 0)
 				if (y == 0 || y == 1 || y == 3)
 					colour = yellow;
+
 				else
 					colour = red;
 			if (x == 1)

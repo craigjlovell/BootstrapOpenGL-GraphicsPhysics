@@ -170,6 +170,7 @@
   <ItemGroup>
     <ClCompile Include="AIE_PhysicsApp.cpp" />
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="GameState.cpp" />
@@ -187,6 +188,7 @@
   <ItemGroup>
     <ClInclude Include="AIE_PhysicsApp.h" />
     <ClInclude Include="App.h" />
+    <ClInclude Include="Ball.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="GameState.h" />
