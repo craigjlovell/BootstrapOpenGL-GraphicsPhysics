@@ -42,12 +42,24 @@ protected:
 
 	Player* m_player;
 	Circle* m_circle;
-	Ball* m_white = NULL;
+	Ball* m_white;
+	Circle* m_hole;
+
+	std::list<PhysicsObject*>m_stripe;
+	std::list<PhysicsObject*>m_solid;
+
+	glm::vec4 c_colour;
+	glm::vec4 c_yellow = glm::vec4(1, 1, 0, 1);
+	glm::vec4 c_red = glm::vec4(1, 0, 0, 1);
+	glm::vec4 c_black = glm::vec4(0, 0, 0, 1);
+	
+	BallType typeOfBall;
 
 	float timer;
 
 	const float m_extents = 100;
 	const float m_aspectRatio = 16.f / 9.f;
+
 
 public:
 
@@ -57,7 +69,9 @@ public:
 	Plane* CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm::vec4 a_colour);
 	Circle* CreateCircle(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force);
 	Ball* CreateBall(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force, BallType a_balls);
+	Circle* CreateHole(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force);
 	Box* CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
+	Box* CreateTable(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 	Player* CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour);
 	Player* CreatePlayer(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 

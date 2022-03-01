@@ -154,80 +154,7 @@ void AIE_PhysicsApp::MouseInputTest(aie::Input* a_input)
 
 void AIE_PhysicsApp::Pool()
 {
-	int numRed = 7;
-	int numYellow = 7;
-	int num = 14;
-
-	Box* table = new Box(glm::vec2(0, 0), glm::vec2(0, 0), 0, 4.f, 102.5f, 55.5f, glm::vec4(0.f, 0.5f, 0.f, 1.f));
-	m_physicsScene->AddActor(table);
-	table->SetKinematic(true);
-	table->SetTrigger(true);
-
-	Box* topleft = new Box(glm::vec2(-25, 30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
-	m_physicsScene->AddActor(topleft);
-	topleft->SetKinematic(true);
-	Box* topright = new Box(glm::vec2(25, 30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
-	m_physicsScene->AddActor(topright);
-	topright->SetKinematic(true);
-	Box* top = new Box(glm::vec2(0, 40), glm::vec2(0, 0), 0, 4.f, 125.f, 4.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
-	m_physicsScene->AddActor(top);
-	top->SetKinematic(true);
-
-	Box* bottomleft = new Box(glm::vec2(-25, -30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
-	m_physicsScene->AddActor(bottomleft);
-	bottomleft->SetKinematic(true);
-	Box* bottomright = new Box(glm::vec2(25, -30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
-	m_physicsScene->AddActor(bottomright);
-	bottomright->SetKinematic(true);
-	Box* bottom = new Box(glm::vec2(0, -40), glm::vec2(0, 0), 0, 4.f, 125.f, 4.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
-	m_physicsScene->AddActor(bottom);
-	bottom->SetKinematic(true);
-
-	Box* left = new Box(glm::vec2(-52.5f, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 50.f, glm::vec4(.5f, .3f, .04f, 1));
-	m_physicsScene->AddActor(left);
-	left->SetKinematic(true);
-	Box* oleft = new Box(glm::vec2(-65, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 85.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
-	m_physicsScene->AddActor(oleft);
-	oleft->SetKinematic(true);
-
-	Box* right = new Box(glm::vec2(52.5f, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 50.f, glm::vec4(.5f, .3f, .04f, 1));
-	m_physicsScene->AddActor(right);
-	right->SetKinematic(true);
-	Box* oright = new Box(glm::vec2(65, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 85.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
-	m_physicsScene->AddActor(oright);
-	oright->SetKinematic(true);
-
-	
-
-	Circle* middleTopHole = CreateCircle(glm::vec2(0, 30), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0,0));
-	middleTopHole->SetKinematic(true);
-	middleTopHole->SetTrigger(true);
-
-	Circle* rightTopHole = CreateCircle(glm::vec2(50, 27.5f), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-	rightTopHole->SetKinematic(true);
-	rightTopHole->SetTrigger(true);
-
-	Circle* leftTopHole = CreateCircle(glm::vec2(-50, 27.5f), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-	leftTopHole->SetKinematic(true);
-	leftTopHole->SetTrigger(true);
-
-	Circle* middleBottomHole = CreateCircle(glm::vec2(0, -30), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-	middleBottomHole->SetKinematic(true);
-	middleBottomHole->SetTrigger(true);
-
-	Circle* rightBottomHole = CreateCircle(glm::vec2(50, -27.5f), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-	rightBottomHole->SetKinematic(true);
-	rightBottomHole->SetTrigger(true);
-
-	Circle* leftBottomHole = CreateCircle(glm::vec2(-50, -27.5f), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
-	leftBottomHole->SetKinematic(true);
-	leftBottomHole->SetTrigger(true);
-
-	m_white = CreateBall(glm::vec2(-40, 0), glm::vec2(0, 0), 1.5f, 2.f, glm::vec4(1,1,1,1), glm::vec2(0,0), WHITEBALL);
-	
-
-	Circle* circle = nullptr;
-
+	Ball* ball = nullptr;
 	float circleRadius = 2.f;
 
 	float xStart = 40.f; // 40;
@@ -236,12 +163,40 @@ void AIE_PhysicsApp::Pool()
 	float xOffset = 5.f; // 3;
 	float yOffset = 5.f; // 5;
 
-	glm::vec4 yellow = glm::vec4(1, 1, 0, 1);
-	glm::vec4 red = glm::vec4(1, 0, 0, 1);
-	glm::vec4 black = glm::vec4(0, 0, 0, 1);
-	glm::vec4 colour;
-	BallType typeOfBall;
+	int a = 7;
+	int b = 7;
 
+	Box* table = CreateTable(glm::vec2(0, 0), glm::vec2(0, 0), 0, 4.f, 102.5f, 55.5f, glm::vec4(0.f, 0.5f, 0.f, 1.f));
+	m_physicsScene->AddActor(table);
+	table->SetKinematic(true);
+	table->SetTrigger(true);
+	
+	CreateTable(glm::vec2(-25, 30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
+	CreateTable(glm::vec2(25, 30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
+	CreateTable(glm::vec2(0, 40), glm::vec2(0, 0), 0, 4.f, 125.f, 4.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
+	CreateTable(glm::vec2(-25, -30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
+	CreateTable(glm::vec2(25, -30), glm::vec2(0, 0), 0, 4.f, 42.5f, 4.f, glm::vec4(.5f, .3f, .04f, 1));
+	CreateTable(glm::vec2(0, -40), glm::vec2(0, 0), 0, 4.f, 125.f, 4.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
+	CreateTable(glm::vec2(-52.5f, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 50.f, glm::vec4(.5f, .3f, .04f, 1));
+	CreateTable(glm::vec2(-65, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 85.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
+	CreateTable(glm::vec2(52.5f, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 50.f, glm::vec4(.5f, .3f, .04f, 1));
+	CreateTable(glm::vec2(65, 0), glm::vec2(0, 0), 0, 4.f, 4.f, 85.f, glm::vec4(1.f, 0.8f, 0.5f, 1.f));
+
+	
+
+	Circle* middleTopHole = CreateHole(glm::vec2(0, 30), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0,0));
+
+	Circle* rightTopHole = CreateHole(glm::vec2(50, 27.5f), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	Circle* leftTopHole = CreateHole(glm::vec2(-50, 27.5f), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	Circle* middleBottomHole = CreateHole(glm::vec2(0, -30), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	Circle* rightBottomHole = CreateHole(glm::vec2(50, -27.5f), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	Circle* leftBottomHole = CreateHole(glm::vec2(-50, -27.5f), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
+
+	m_white = CreateBall(glm::vec2(-40, 0), glm::vec2(0, 0), 1.5f, 2.f, glm::vec4(1,1,1,1), glm::vec2(0,0), WHITEBALL);
 	
 	for (int x = 0; x < 5; x++)
 	{
@@ -255,86 +210,78 @@ void AIE_PhysicsApp::Pool()
 			if (x == 0)
 				if (y == 0 || y == 1 || y == 3)
 				{
-					colour = yellow;
+					c_colour = c_yellow;
 					typeOfBall = SOLID;
+					m_solid.push_back(ball);
 				}
 				else
 				{
-					colour = red;
+					c_colour = c_red;
 					typeOfBall = STRIPE;
+					m_stripe.push_back(ball);
 				}
 			if (x == 1)
 				if (y == 1 || y == 3)
 				{
-					colour = yellow;
+					c_colour = c_yellow;
 					typeOfBall = SOLID;
+					m_solid.push_back(ball);
 				}
 				else
 				{
-					colour = red;
+					c_colour = c_red;
 					typeOfBall = STRIPE;
+					m_stripe.push_back(ball);
 				}
 			if (x == 2)
 				if (y == 0)
 				{
-					colour = yellow;
+					c_colour = c_yellow;
 					typeOfBall = SOLID;
+					m_solid.push_back(ball);
 				}
 				else if (y == 1)
 				{
-					colour = black;
+					c_colour = c_black;
 					typeOfBall = BLACKBALL;
 				}
 				else
 				{
-					colour = red;
+					c_colour = c_red;
 					typeOfBall = STRIPE;
+					m_stripe.push_back(ball);
 				}
 			if (x == 3)
 				if (y == 1)
 				{
-					colour = yellow;
+					c_colour = c_yellow;
 					typeOfBall = SOLID;
+					m_solid.push_back(ball);
 				}
 				else
 				{
-					colour = red;
+					c_colour = c_red;
 					typeOfBall = STRIPE;
+					m_stripe.push_back(ball);
 				}
 			else if (x == 4)
 			{
-				colour = red;
+				c_colour = c_red;
 				typeOfBall = STRIPE;
+				m_stripe.push_back(ball);
 			}
-			CreateBall(pos, glm::vec2(0), 1.f, circleRadius, colour, glm::vec2(0, 0), typeOfBall);
+			ball = CreateBall(pos, glm::vec2(0), 1.f, circleRadius, c_colour, glm::vec2(0, 0), typeOfBall);
 		}
+
+		
 	}
 
-	middleTopHole->triggerExit = [=](PhysicsObject* a_other)
-	{
-		m_physicsScene->RemoveActor(a_other);
-	};
-	rightTopHole->triggerExit = [=](PhysicsObject* a_other)
-	{
-		m_physicsScene->RemoveActor(a_other);
-	};
-	leftTopHole->triggerExit = [=](PhysicsObject* a_other)
-	{
-		m_physicsScene->RemoveActor(a_other);
-	};
-	middleBottomHole->triggerExit = [=](PhysicsObject* a_other)
-	{
-		m_physicsScene->RemoveActor(a_other);
-	};
-	rightBottomHole->triggerExit = [=](PhysicsObject* a_other)
-	{
-		m_physicsScene->RemoveActor(a_other);
-	};
-	leftBottomHole->triggerExit = [=](PhysicsObject* a_other)
-	{
-		m_physicsScene->RemoveActor(a_other);
-	};	
-	
+		
+	if (m_solid.empty())
+		std::cout << "soilds win" << std::endl;
+	if (m_stripe.empty())
+		std::cout << "strips win" << std::endl;
+
 }
 
 void AIE_PhysicsApp::ObjectTest()
@@ -517,11 +464,47 @@ Ball* AIE_PhysicsApp::CreateBall(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass,
 	return ball;
 }
 
+Circle* AIE_PhysicsApp::CreateHole(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force)
+{
+	Circle* circle = new Circle(a_pos, a_vel, a_mass, a_radius, a_colour);
+
+	m_physicsScene->AddActor(circle);
+	circle->SetKinematic(true);
+	circle->SetTrigger(true);
+
+	circle->ApplyForce(a_force, circle->GetPosition());
+
+	circle->triggerExit = [=](PhysicsObject* a_other)
+	{
+		if (a_other->GetBallID() == STRIPE)
+			m_stripe.remove(a_other);
+		if (a_other->GetBallID() == SOLID)
+			m_solid.remove(a_other);
+		if (a_other->GetBallID() == WHITEBALL)
+			return;
+		m_physicsScene->RemoveActor(a_other);
+	};
+
+	return circle;
+}
+
 Box* AIE_PhysicsApp::CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour)
 {
 	Box* box = new Box(a_position, a_velocity, a_rotation, a_mass, a_width, a_height, a_colour);
 
 	m_physicsScene->AddActor(box);
+
+	box->ApplyForce(glm::vec2(0.f, -20.f), box->GetPosition());
+
+	return box;
+}
+
+Box* AIE_PhysicsApp::CreateTable(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour)
+{
+	Box* box = new Box(a_position, a_velocity, a_rotation, a_mass, a_width, a_height, a_colour);
+
+	m_physicsScene->AddActor(box);
+	box->SetKinematic(true);
 
 	box->ApplyForce(glm::vec2(0.f, -20.f), box->GetPosition());
 

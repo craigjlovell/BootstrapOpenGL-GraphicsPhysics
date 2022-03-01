@@ -56,7 +56,7 @@ void GameState::draw()
 {
 	
 	m_2dRenderer->begin();
-	m_2dRenderer->drawText(m_font, "GameState ", 0, 720 - 100);
+	m_2dRenderer->drawText(m_font, "Billards ", 0, 720 - 100);
 	m_physApp->draw();
 	m_2dRenderer->end();
 }
