@@ -15,6 +15,14 @@ enum ShapeType
 	SHAPE_COUNT
 };
 
+enum BallType
+{
+	STRIPE,
+	SOLID,
+	WHITEBALL,
+	BLACKBALL
+};
+
 
 class PhysicsObject
 {
@@ -31,6 +39,7 @@ public:
 	void Debug();
 
 	ShapeType GetShapeID() { return m_shapeID; }
+	BallType GetBallID() { return m_ballType; }
 
 	float GetElasticity() { return m_elasticity; }
 	void SetElasticity(float a_elsticity) { m_elasticity = a_elsticity; }
@@ -47,6 +56,7 @@ protected:
 	float m_elasticity;
 	bool m_isKinematic;
 	bool m_isTrigger;
+	BallType m_ballType;
 
 	std::list<PhysicsObject*> m_objectsInside;
 	std::list<PhysicsObject*> m_objectsInsideThisFrame;

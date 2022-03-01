@@ -12,6 +12,7 @@ class Circle;
 class Plane;
 class Player;
 class Box;
+class Ball;
 
 
 class AIE_PhysicsApp
@@ -41,6 +42,7 @@ protected:
 
 	Player* m_player;
 	Circle* m_circle;
+	Ball* m_white = NULL;
 
 	float timer;
 
@@ -54,6 +56,7 @@ public:
 
 	Plane* CreatePlane(glm::vec2 a_normal, float a_distToOrigin, glm::vec4 a_colour);
 	Circle* CreateCircle(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force);
+	Ball* CreateBall(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force, BallType a_balls);
 	Box* CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 	Player* CreatePlayer(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour);
 	Player* CreatePlayer(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);

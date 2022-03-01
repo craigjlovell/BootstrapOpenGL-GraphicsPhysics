@@ -8,6 +8,7 @@
 #include "Box.h"
 #include "Spring.h"
 #include "Softbody.h"
+#include "Ball.h"
 
 #include <Gizmos.h>
 
@@ -72,6 +73,7 @@ void AIE_PhysicsApp::update(float deltaTime)
 
 	m_physicsScene->Update(deltaTime);
 	m_physicsScene->Draw();
+
 	//timer += deltaTime;
 	//std::cout << "timer" << timer << std::endl;
 	//if (timer > 0.2 && m_rocket->GetMass() > 1.f)
@@ -140,14 +142,13 @@ void AIE_PhysicsApp::MouseInputTest(aie::Input* a_input)
 		m_ketPressed = true;		
 		a_input->getMouseXY(&xScreen, &yScreen);
 		glm::vec2 worldPos = ScreenToWorld(glm::vec2(xScreen, yScreen));
-		aie::Gizmos::add2DCircle(worldPos, 5, 32, glm::vec4(0.1f, 0.1f, 0.9f, 1.f));
+		aie::Gizmos::add2DLine(worldPos, m_white->GetPosition(), glm::vec4(1,1,1,1));
 	}
 	if (a_input->wasMouseButtonReleased(0))
 	{
 		a_input->getMouseXY(&xScreen, &yScreen);
 		glm::vec2 worldPos = ScreenToWorld(glm::vec2(xScreen, yScreen));
-		Circle* spawn = new Circle(worldPos, glm::vec2(0), 4.f, 4.f, glm::vec4(0.1f, 0.1f, 0.4f, 1.f));
-		m_physicsScene->AddActor(spawn);
+		m_white->ApplyForce(-worldPos, glm::vec2(0, 0));
 	}
 }
 
@@ -222,8 +223,8 @@ void AIE_PhysicsApp::Pool()
 	leftBottomHole->SetKinematic(true);
 	leftBottomHole->SetTrigger(true);
 
-	m_player = CreatePlayer(glm::vec2(-40, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1,1,1,1));
-	m_physicsScene->AddActor(m_player);
+	m_white = CreateBall(glm::vec2(-40, 0), glm::vec2(0, 0), 1.5f, 2.f, glm::vec4(1,1,1,1), glm::vec2(0,0), WHITEBALL);
+	
 
 	Circle* circle = nullptr;
 
@@ -234,10 +235,12 @@ void AIE_PhysicsApp::Pool()
 
 	float xOffset = 5.f; // 3;
 	float yOffset = 5.f; // 5;
+
 	glm::vec4 yellow = glm::vec4(1, 1, 0, 1);
 	glm::vec4 red = glm::vec4(1, 0, 0, 1);
 	glm::vec4 black = glm::vec4(0, 0, 0, 1);
 	glm::vec4 colour;
+	BallType typeOfBall;
 
 	
 	for (int x = 0; x < 5; x++)
@@ -251,31 +254,59 @@ void AIE_PhysicsApp::Pool()
 
 			if (x == 0)
 				if (y == 0 || y == 1 || y == 3)
+				{
 					colour = yellow;
-
+					typeOfBall = SOLID;
+				}
 				else
+				{
 					colour = red;
+					typeOfBall = STRIPE;
+				}
 			if (x == 1)
 				if (y == 1 || y == 3)
+				{
 					colour = yellow;
+					typeOfBall = SOLID;
+				}
 				else
+				{
 					colour = red;
+					typeOfBall = STRIPE;
+				}
 			if (x == 2)
 				if (y == 0)
+				{
 					colour = yellow;
+					typeOfBall = SOLID;
+				}
 				else if (y == 1)
+				{
 					colour = black;
+					typeOfBall = BLACKBALL;
+				}
 				else
+				{
 					colour = red;
+					typeOfBall = STRIPE;
+				}
 			if (x == 3)
 				if (y == 1)
+				{
 					colour = yellow;
+					typeOfBall = SOLID;
+				}
 				else
+				{
 					colour = red;
-			else if(x == 4)
+					typeOfBall = STRIPE;
+				}
+			else if (x == 4)
+			{
 				colour = red;
-
-			circle = CreateCircle(pos, glm::vec2(0), 2.f, circleRadius, colour, glm::vec2(0, 0));
+				typeOfBall = STRIPE;
+			}
+			CreateBall(pos, glm::vec2(0), 1.f, circleRadius, colour, glm::vec2(0, 0), typeOfBall);
 		}
 	}
 
@@ -473,6 +504,17 @@ Circle* AIE_PhysicsApp::CreateCircle(glm::vec2 a_pos, glm::vec2 a_vel, float a_m
 	circle->ApplyForce(a_force, circle->GetPosition());
 
 	return circle;
+}
+
+Ball* AIE_PhysicsApp::CreateBall(glm::vec2 a_pos, glm::vec2 a_vel, float a_mass, float a_radius, glm::vec4 a_colour, glm::vec2 a_force, BallType a_balls)
+{
+	Ball* ball = new Ball(a_pos, a_vel, a_mass, a_radius, a_colour, a_balls);
+
+	m_physicsScene->AddActor(ball);
+
+	ball->ApplyForce(a_force, ball->GetPosition());
+
+	return ball;
 }
 
 Box* AIE_PhysicsApp::CreateBox(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour)

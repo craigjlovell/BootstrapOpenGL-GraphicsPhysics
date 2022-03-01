@@ -6,6 +6,7 @@
 #include "Plane.h"
 #include "Box.h"
 #include "Player.h"
+#include "Ball.h"
 
 PhysicsScene::PhysicsScene() : m_timeStep(0.01f), m_gravity(glm::vec2(0, 0))
 {
