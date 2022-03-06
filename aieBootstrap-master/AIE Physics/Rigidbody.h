@@ -50,7 +50,7 @@ public:
 	float GetAngularDrag() { return m_angularDrag; }
 	float SetAngularDrag(float a_angularDrag) { return m_angularDrag = a_angularDrag; }
 
-
+	void SetVelocity(glm::vec2 a_vel) { m_velocity = a_vel; }
 	void SetPosition(glm::vec2 a_position) {m_position = a_position; }
 
 	void TriggerEnter(PhysicsObject* a_otherObject);

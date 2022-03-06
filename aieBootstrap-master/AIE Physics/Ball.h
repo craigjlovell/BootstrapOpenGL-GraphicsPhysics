@@ -10,8 +10,10 @@ public:
 	void MakeGizmo();
 	float GetRadius() { return m_radius; }
 	glm::vec4 GetColour() { return m_colour; }
+	BallType GetBallID() { return m_ballType; }
 protected:
 	float m_radius;
 	glm::vec4 m_colour;
+	BallType m_ballType;
 };
 

@@ -83,7 +83,7 @@ void AIE_PhysicsApp::update(float deltaTime)
 	//	timer = 0;
 	//}	
 
-	MouseInputTest(input);
+	HitCueBall(input);
 }
 
 void AIE_PhysicsApp::draw() 
@@ -152,6 +152,58 @@ void AIE_PhysicsApp::MouseInputTest(aie::Input* a_input)
 	}
 }
 
+void AIE_PhysicsApp::HitCueBall(aie::Input* a_input)
+{
+	int screenX, screenY;
+
+	glm::vec2 forceVector;
+
+	if (a_input->isMouseButtonDown(0))
+	{
+		for (auto ball : m_balls)
+		{
+			if (ball->GetVelocity().x > 0.15f || ball->GetVelocity().x < -0.15f &&
+				ball->GetVelocity().y > 0.15f || ball->GetVelocity().y < -0.15f)
+			{
+				m_ballsStatic = false;
+				break;
+			}
+			if (ball == m_balls.back())
+				m_ballsStatic = true;
+		}
+
+		if (m_ballsStatic)
+		{
+			a_input->getMouseXY(&screenX, &screenY);
+			glm::vec2 worldPos = ScreenToWorld(glm::vec2(screenX, screenY));
+
+			if (m_forcestart == glm::vec2(0, 0))
+				m_forcestart = worldPos;
+
+			glm::vec2 cuePos = m_white->GetPosition();
+
+			forceVector = glm::vec2(m_forcestart - worldPos);
+			float forceVectorLength = glm::length(forceVector);
+			forceVectorLength = glm::clamp(forceVectorLength, 0.f, 20.f);
+
+			float angle = atan2f(forceVector.y, forceVector.x);
+			glm::vec2 end = glm::vec2(std::cos(angle), std::sin(angle)) * forceVectorLength;
+
+			aie::Gizmos::add2DLine(cuePos, cuePos + end, glm::vec4(1, 0.5f, 0, 1)); // on release set cue velocity to forcevector
+
+			m_cforce = forceVector * 20.f;
+		}
+	}
+	if (a_input->wasMouseButtonReleased(0))
+	{
+		if (m_ballsStatic)
+		{
+			m_forcestart = glm::vec2(0, 0);
+			m_white->ApplyForce(m_cforce, glm::vec2(0, 0));
+		}
+	}
+}
+
 void AIE_PhysicsApp::Pool()
 {
 	Ball* ball = nullptr;
@@ -196,7 +248,7 @@ void AIE_PhysicsApp::Pool()
 
 	Circle* leftBottomHole = CreateHole(glm::vec2(-50, -27.5f), glm::vec2(0, 0), 4.f, 3.f, glm::vec4(1, 0, 0, 1), glm::vec2(0, 0));
 
-	m_white = CreateBall(glm::vec2(-40, 0), glm::vec2(0, 0), 1.5f, 2.f, glm::vec4(1,1,1,1), glm::vec2(0,0), WHITEBALL);
+	m_white = CreateBall(glm::vec2(-40, 0), glm::vec2(0, 0), 4.f, 2.f, glm::vec4(1,1,1,1), glm::vec2(0,0), WHITEBALL);
 	
 	for (int x = 0; x < 5; x++)
 	{
@@ -212,33 +264,28 @@ void AIE_PhysicsApp::Pool()
 				{
 					c_colour = c_yellow;
 					typeOfBall = SOLID;
-					m_solid.push_back(ball);
 				}
 				else
 				{
 					c_colour = c_red;
 					typeOfBall = STRIPE;
-					m_stripe.push_back(ball);
 				}
 			if (x == 1)
 				if (y == 1 || y == 3)
 				{
 					c_colour = c_yellow;
 					typeOfBall = SOLID;
-					m_solid.push_back(ball);
 				}
 				else
 				{
 					c_colour = c_red;
 					typeOfBall = STRIPE;
-					m_stripe.push_back(ball);
 				}
 			if (x == 2)
 				if (y == 0)
 				{
 					c_colour = c_yellow;
 					typeOfBall = SOLID;
-					m_solid.push_back(ball);
 				}
 				else if (y == 1)
 				{
@@ -249,28 +296,26 @@ void AIE_PhysicsApp::Pool()
 				{
 					c_colour = c_red;
 					typeOfBall = STRIPE;
-					m_stripe.push_back(ball);
 				}
 			if (x == 3)
 				if (y == 1)
 				{
 					c_colour = c_yellow;
 					typeOfBall = SOLID;
-					m_solid.push_back(ball);
 				}
 				else
 				{
 					c_colour = c_red;
 					typeOfBall = STRIPE;
-					m_stripe.push_back(ball);
 				}
 			else if (x == 4)
 			{
 				c_colour = c_red;
 				typeOfBall = STRIPE;
-				m_stripe.push_back(ball);
 			}
-			ball = CreateBall(pos, glm::vec2(0), 1.f, circleRadius, c_colour, glm::vec2(0, 0), typeOfBall);
+			ball = CreateBall(pos, glm::vec2(0), 4.f, circleRadius, c_colour, glm::vec2(0, 0), typeOfBall);
+
+			m_balls.push_back(ball);
 		}
 
 		
@@ -281,7 +326,8 @@ void AIE_PhysicsApp::Pool()
 		std::cout << "soilds win" << std::endl;
 	if (m_stripe.empty())
 		std::cout << "strips win" << std::endl;
-
+	m_white->SetLinearDrag(0.45f);
+	m_balls.push_back(m_white);
 }
 
 void AIE_PhysicsApp::ObjectTest()
@@ -476,13 +522,26 @@ Circle* AIE_PhysicsApp::CreateHole(glm::vec2 a_pos, glm::vec2 a_vel, float a_mas
 
 	circle->triggerExit = [=](PhysicsObject* a_other)
 	{
-		if (a_other->GetBallID() == STRIPE)
-			m_stripe.remove(a_other);
-		if (a_other->GetBallID() == SOLID)
-			m_solid.remove(a_other);
-		if (a_other->GetBallID() == WHITEBALL)
-			return;
-		m_physicsScene->RemoveActor(a_other);
+		Ball* ball = dynamic_cast<Ball*>(a_other);
+		if (ball != nullptr)
+		{
+			if (ball->GetBallID() == STRIPE)
+			{
+				m_stripe.remove(a_other);
+				m_physicsScene->RemoveActor(a_other);
+			}
+			if (ball->GetBallID() == SOLID)
+			{
+				m_solid.remove(a_other);
+				m_physicsScene->RemoveActor(a_other);
+			}
+			if (ball->GetBallID() == WHITEBALL)
+			{
+				m_white->SetPosition(glm::vec2(-40, 0));
+				m_white->SetVelocity(glm::vec2(0, 0));
+			}
+		}
+		ball = nullptr;
 	};
 
 	return circle;

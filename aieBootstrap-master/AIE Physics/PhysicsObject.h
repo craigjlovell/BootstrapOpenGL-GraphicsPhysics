@@ -39,7 +39,7 @@ public:
 	void Debug();
 
 	ShapeType GetShapeID() { return m_shapeID; }
-	BallType GetBallID() { return m_ballType; }
+	
 
 	float GetElasticity() { return m_elasticity; }
 	void SetElasticity(float a_elsticity) { m_elasticity = a_elsticity; }
