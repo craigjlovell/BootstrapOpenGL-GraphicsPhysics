@@ -1,10 +1,7 @@
 #include "MenuState.h"
 #include "GameStateManager.h"
-#include "App.h"
 #include "Gizmos.h"
 #include <iostream>
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
 
 
 
@@ -51,7 +48,6 @@ void MenuState::draw()
 
 	m_2dRenderer->setRenderColour(0.8f, 0.f, 0.5f, 1.f);
 	m_2dRenderer->drawBox(m_app->getWindowWidth() / 2, m_app->getWindowHeight() / 2, m_app->getWindowWidth()/2, m_app->getWindowHeight()/2, 0, 0);
-	aie::Gizmos::draw2D(m_app->getWindowWidth() / 2, m_app->getWindowHeight() / 2);
 	m_2dRenderer->setRenderColour(0.f, 1.f, 0.f, 1.f);
 	m_2dRenderer->drawText(m_font, "MenuScreen ", m_app->getWindowWidth() / 2 - 100, m_app->getWindowHeight() / 2, 0);
 	m_2dRenderer->setRenderColour(0.f, 0.f, 1.f, 1.f);

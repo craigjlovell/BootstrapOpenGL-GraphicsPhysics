@@ -2,7 +2,6 @@
 #include "App.h"
 #include "IGameState.h"
 #include <Input.h>
-#include "Renderer2D.h"
 
 class App;
 
