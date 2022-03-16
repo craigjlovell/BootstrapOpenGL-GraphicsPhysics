@@ -5,6 +5,7 @@
 #include <glm/ext.hpp>
 #include "Planet.h"
 #include "Mesh.h"
+#include <imgui.h>
 
 using glm::vec3;
 using glm::vec4;
@@ -30,6 +31,9 @@ bool GraphicsApp::startup() {
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
+	m_light.direction = { 1,-1,1 };
+	m_light.color = { 1,1,1 };
+	m_ambientLight = { 1.0f,1.0f,1.0f };
 
 	return LaunchSahders();
 }
@@ -59,11 +63,29 @@ void GraphicsApp::update(float deltaTime) {
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
+	// Grab the time since the application started
+	float time = getTime();
+
+	// Rotate the light
+	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
+	
+
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
+	
+	ImGui::Begin("Light Settings");
+	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 2.0f);
+	ImGui::End();
+
+	if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
+		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', -0.1f);
+	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
+		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', 0.1f);
+
 	//DrawPlanets();
 }
 
@@ -76,16 +98,79 @@ void GraphicsApp::draw() {
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
 
 	//Bind the shader
-	m_shader.bind();
+	m_phongShader.bind();
+
+	m_modelTransform = m_bunnyTransform;
+
+	m_phongShader.bindUniform("AmbientColor", m_ambientLight);
+	m_phongShader.bindUniform("LightColor", m_light.color);
+	m_phongShader.bindUniform("LightDirection", m_light.direction);
+
+	m_phongShader.bindUniform("CameraPosition", glm::vec3(glm::inverse(m_viewMatrix)[3]));
 
 	// Bind the transform
-	auto pvm = m_projectionMatrix * m_viewMatrix * m_quadTransform;
-	m_shader.bindUniform("ProjectionViewModel", pvm);
+	auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 
 	// Draw the quad
+	m_bunnyMesh.draw();
+
+	// Bind the shader
+	m_phongShader.bind();
+
+	m_modelTransform = m_quadTransform;
+
+	// Bind the transform
+	pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	m_phongShader.bindUniform("ProjectionViewModel", pvm);
+
+	// Simple binding for lightning data based on model used
+	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+
+	// Draw quad
 	m_quadMesh.draw();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
+}
+
+glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmount)
+{
+	float cos = glm::cos(rotationAmount);
+	float sin = glm::sin(rotationAmount);
+
+	glm::mat4 tempMat;
+
+	if (std::tolower(axis) == 'x')
+	{
+		tempMat =
+		{
+			1,		0,		0,		0,
+			0,		cos,	-sin,	0,
+			0,		sin,	cos,	0,
+			0,		0,		0,		1
+		};
+	}
+	if (std::tolower(axis) == 'y')
+	{
+		tempMat = {
+			cos,	0,		sin,	0,
+			0,		1,		0,		0,
+			-sin,	0,		cos,	0,
+			0,		0,		0,		1
+		};
+	}
+
+	if (std::tolower(axis) == 'z')
+	{
+		tempMat = {
+		cos, -sin,	0,	0,
+		sin,  cos,	0,	0,
+		0,	    0,	1,	0,
+		0,		0,	0,	1
+		};
+	}
+
+	return matrix * tempMat;
 }
 
 void GraphicsApp::DrawPlanets()
@@ -129,6 +214,15 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 
+	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
+	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
+
+	if (m_phongShader.link() == false)
+	{
+		printf("phong Shader Error: %s\n", m_phongShader.getLastError());
+		return false;
+	}
+
 	Mesh::Vertex verticies[4];
 	verticies[0].position = { -0.5 ,0 ,  0.5 ,1 };
 	verticies[1].position = {  0.5 ,0 ,  0.5 ,1 };
@@ -140,7 +234,7 @@ bool GraphicsApp::LaunchSahders()
 
 
 
-	//m_quadMesh.InitialiseQuad();
+	m_quadMesh.InitialiseQuad();
 	m_quadTransform = { 10 ,0  ,0  ,0 ,
 						0  ,10 ,0  ,0 ,
 						0  ,0  ,10 ,0 ,
@@ -158,7 +252,7 @@ bool GraphicsApp::LaunchSahders()
 		0    ,0    ,0    ,1
 	};
 
-	CreateHex();
+	//CreateHex();
 	return true;
 }
 
@@ -210,12 +304,12 @@ void GraphicsApp::CreatePyramid()
 void GraphicsApp::CreateHex()
 {
 	Mesh::Vertex verticies[6];
-	verticies[0].position = { -0.5 , 0 ,  0.5  ,1 };
-	verticies[1].position = {  0.5 , 0 ,  0.5  ,1 };
-	verticies[2].position = { -0.5 , 0 , -0.5  ,1 };
-	verticies[3].position = {  0.5 , 0 , -0.5  ,1 };
-	verticies[4].position = {  0.5 , 0 , -0.5  ,1 };
-	verticies[5].position = {  0.5 , 0 , -0.5  ,1 };
+	verticies[0].position = { -0.5f, 0.0f, -1.0f, 1};
+	verticies[1].position = { 0.5f, 0.0f, -1.0f,1   };
+	verticies[2].position = { 1.0f, 0.0f, 0.0f,1   };
+	verticies[3].position = { 0.5f, 0.0f, 1.0f,1  };
+	verticies[4].position = { -0.5f, 0.0f, 1.0f,1};
+	verticies[5].position = { -1.0f, 0.0f, 0.0f, 1};
 
 	unsigned int indicies[18] = {
 								 1,6,0,
@@ -226,4 +320,9 @@ void GraphicsApp::CreateHex()
 								 2,1,0};
 
 	m_quadMesh.Initialise(6, verticies, 18, indicies);
+}
+
+void GraphicsApp::CreateGrid()
+{
+
 }
