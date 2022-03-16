@@ -112,6 +112,8 @@ void GraphicsApp::draw() {
 	auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 
+	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+
 	// Draw the quad
 	m_bunnyMesh.draw();
 
