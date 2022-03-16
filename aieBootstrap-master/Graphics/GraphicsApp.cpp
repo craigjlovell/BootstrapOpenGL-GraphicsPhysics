@@ -83,7 +83,7 @@ void GraphicsApp::draw() {
 	m_shader.bindUniform("ProjectionViewModel", pvm);
 
 	// Draw the quad
-	m_quadMesh.Draw();
+	m_quadMesh.draw();
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 }
@@ -129,10 +129,101 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 
-	m_quadMesh.InitialiseQuad();
+	Mesh::Vertex verticies[4];
+	verticies[0].position = { -0.5 ,0 ,  0.5 ,1 };
+	verticies[1].position = {  0.5 ,0 ,  0.5 ,1 };
+	verticies[2].position = { -0.5 ,0 , -0.5 ,1 };
+	verticies[3].position = {  0.5 ,0 , -0.5 ,1 };
+
+	unsigned int indicies[6] = { 0,1,2,
+								 2,1,3 };
+
+
+
+	//m_quadMesh.InitialiseQuad();
 	m_quadTransform = { 10 ,0  ,0  ,0 ,
 						0  ,10 ,0  ,0 ,
 						0  ,0  ,10 ,0 ,
 						0  ,0  ,0  ,1 };
+
+	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
+	{
+		printf("Bunny mesh error!\n");
+		return false;
+	}
+	m_bunnyTransform = {
+		0.5f ,0    ,0    ,0 ,
+		0    ,0.5f ,0    ,0 ,
+		0    ,0    ,0.5f ,0 ,
+		0    ,0    ,0    ,1
+	};
+
+	CreateHex();
 	return true;
+}
+
+void GraphicsApp::CreateBox()
+{
+	Mesh::Vertex verticies[8];
+	verticies[0].position = { -0.5 ,0.5 , 0.5 ,1 };
+	verticies[1].position = {  0.5 ,0.5 , 0.5 ,1 };
+	verticies[2].position = { -0.5 ,0.5 ,-0.5 ,1 };
+	verticies[3].position = {  0.5 ,0.5 ,-0.5 ,1 };
+								      	    
+	verticies[4].position = { -0.5 ,-0.5 , 0.5 ,1 };
+	verticies[5].position = {  0.5 ,-0.5 , 0.5 ,1 };
+	verticies[6].position = { -0.5 ,-0.5 ,-0.5 ,1 };
+	verticies[7].position = {  0.5 ,-0.5 ,-0.5 ,1 };
+
+	unsigned int indicies[36] = {
+								 0,1,2,2,1,3, // top
+								 0,4,1,1,4,5, // left front
+								 2,6,0,0,6,4, // back left
+								 3,7,2,2,7,6, // back right
+								 1,5,3,3,5,7, // right front
+								 5,4,7,7,4,6  // bottom
+	};
+
+	m_quadMesh.Initialise(8, verticies, 36, indicies);
+}
+
+void GraphicsApp::CreatePyramid()
+{
+	Mesh::Vertex verticies[5];
+	verticies[0].position = { -0.5 ,-0.5 , 0.5 ,1 };
+	verticies[1].position = { 0.5 ,-0.5 , 0.5 ,1 };
+	verticies[2].position = { -0.5 ,-0.5 ,-0.5 ,1 };
+	verticies[3].position = { 0.5 ,-0.5 ,-0.5 ,1 };
+
+	verticies[4].position = { 0,0.5,0,1 };
+
+	unsigned int indicies[18] = {
+								 5,4,7,7,4,6, // bottom
+								 2,4,0,
+								 3,4,2,
+								 3,4,1,
+								 1,4,0};
+
+	m_quadMesh.Initialise(5, verticies, 18, indicies);
+}
+
+void GraphicsApp::CreateHex()
+{
+	Mesh::Vertex verticies[6];
+	verticies[0].position = { -0.5 , 0 ,  0.5  ,1 };
+	verticies[1].position = {  0.5 , 0 ,  0.5  ,1 };
+	verticies[2].position = { -0.5 , 0 , -0.5  ,1 };
+	verticies[3].position = {  0.5 , 0 , -0.5  ,1 };
+	verticies[4].position = {  0.5 , 0 , -0.5  ,1 };
+	verticies[5].position = {  0.5 , 0 , -0.5  ,1 };
+
+	unsigned int indicies[18] = {
+								 1,6,0,
+								 6,5,0,
+								 5,4,0,
+								 4,3,0,
+								 3,2,0,
+								 2,1,0};
+
+	m_quadMesh.Initialise(6, verticies, 18, indicies);
 }
