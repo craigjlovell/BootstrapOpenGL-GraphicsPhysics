@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
+#include "Camera.h"
 
 
 class GraphicsApp : public aie::Application {
@@ -37,6 +38,8 @@ protected:
 
 	aie::ShaderProgram m_shader;
 	aie::ShaderProgram m_phongShader;
+
+	Camera			   m_camera;
 
 	glm::mat4		   m_modelTransform;
 

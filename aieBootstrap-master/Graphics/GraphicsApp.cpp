@@ -68,7 +68,13 @@ void GraphicsApp::update(float deltaTime) {
 
 	// Rotate the light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
-	
+
+	ImGui::Begin("Light Settings");
+	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 2.0f);
+	ImGui::End();
+
+	m_camera.update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -76,15 +82,12 @@ void GraphicsApp::update(float deltaTime) {
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 	
-	ImGui::Begin("Light Settings");
-	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 2.0f);
-	ImGui::End();
-
 	if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
 		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', -0.1f);
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
 		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', 0.1f);
+
+	
 
 	//DrawPlanets();
 }
@@ -95,7 +98,9 @@ void GraphicsApp::draw() {
 	clearScreen();
 
 	// update perspective based on screen size
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
+	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
+	glm::mat4 projectionMatrix = m_camera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_camera.GetViewMatrix();
 
 	//Bind the shader
 	m_phongShader.bind();
@@ -106,10 +111,13 @@ void GraphicsApp::draw() {
 	m_phongShader.bindUniform("LightColor", m_light.color);
 	m_phongShader.bindUniform("LightDirection", m_light.direction);
 
-	m_phongShader.bindUniform("CameraPosition", glm::vec3(glm::inverse(m_viewMatrix)[3]));
+	m_phongShader.bindUniform("CameraPosition", m_camera.GetPosition());
 
 	// Bind the transform
-	auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	//auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	
+	// Bind the transform
+	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 
 	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
@@ -123,7 +131,7 @@ void GraphicsApp::draw() {
 	m_modelTransform = m_quadTransform;
 
 	// Bind the transform
-	pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 
 	// Simple binding for lightning data based on model used
@@ -132,7 +140,9 @@ void GraphicsApp::draw() {
 	// Draw quad
 	m_quadMesh.draw();
 
-	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
+	//Gizmos::draw(m_projectionMatrix * m_viewMatrix);
+
+	Gizmos::draw(projectionMatrix * viewMatrix);
 }
 
 glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmount)
