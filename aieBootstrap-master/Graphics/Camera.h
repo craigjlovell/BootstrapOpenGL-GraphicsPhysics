@@ -15,18 +15,16 @@ public:
 
 	glm::mat4 GetProjectionMatrix(float w, float h);
 
-protected:
+	
 
-private:
+protected:
 
 	float m_theta;
 	float m_phi;
 	glm::vec3 m_position;
+
 	float m_lastMouseX;
 	float m_lastMouseY;
-
-
-
-
+private:
 };
 

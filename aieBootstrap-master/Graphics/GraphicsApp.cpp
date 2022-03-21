@@ -5,7 +5,8 @@
 #include <glm/ext.hpp>
 #include "Planet.h"
 #include "Mesh.h"
-#include <imgui.h>
+#include "imgui.h"
+
 
 using glm::vec3;
 using glm::vec4;
@@ -74,7 +75,9 @@ void GraphicsApp::update(float deltaTime) {
 	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 2.0f);
 	ImGui::End();
 
+	m_flyCamera.SetSpeed();
 	m_camera.update(deltaTime);
+	m_flyCamera.update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -99,8 +102,8 @@ void GraphicsApp::draw() {
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_camera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_camera.GetViewMatrix();
+	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
 
 	//Bind the shader
 	m_phongShader.bind();
@@ -111,7 +114,7 @@ void GraphicsApp::draw() {
 	m_phongShader.bindUniform("LightColor", m_light.color);
 	m_phongShader.bindUniform("LightDirection", m_light.direction);
 
-	m_phongShader.bindUniform("CameraPosition", m_camera.GetPosition());
+	m_phongShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
 
 	// Bind the transform
 	//auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;

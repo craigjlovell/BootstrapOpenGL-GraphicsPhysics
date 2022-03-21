@@ -6,7 +6,7 @@
 #include "Mesh.h"
 #include "OBJMesh.h"
 #include "Camera.h"
-
+#include "FlyCamera.h"
 
 class GraphicsApp : public aie::Application {
 public:
@@ -36,24 +36,25 @@ protected:
 
 	void CreateGrid();
 
-	aie::ShaderProgram m_shader;
-	aie::ShaderProgram m_phongShader;
+	aie::ShaderProgram	m_shader;
+	aie::ShaderProgram	m_phongShader;
 
-	Camera			   m_camera;
+	Camera				m_camera;
+	FlyCamera			m_flyCamera;
 
-	glm::mat4		   m_modelTransform;
+	glm::mat4			m_modelTransform;
 
 	// Generic quad data
-	Mesh		m_quadMesh;
-	glm::mat4	m_quadTransform;
+	Mesh				m_quadMesh;
+	glm::mat4			m_quadTransform;
 
 	// Standford Bunny Data
-	aie::OBJMesh	m_bunnyMesh;
-	glm::mat4		m_bunnyTransform;
+	aie::OBJMesh		m_bunnyMesh;
+	glm::mat4			m_bunnyTransform;
 
 	// camera transforms
-	glm::mat4	m_viewMatrix;
-	glm::mat4	m_projectionMatrix;
+	glm::mat4			m_viewMatrix;
+	glm::mat4			m_projectionMatrix;
 
 	struct Light
 	{
