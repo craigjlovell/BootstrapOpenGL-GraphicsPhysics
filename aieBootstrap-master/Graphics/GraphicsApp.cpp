@@ -78,9 +78,9 @@ void GraphicsApp::update(float deltaTime) {
 
 	ImGui::End();
 
-	m_flyCamera.SetSpeed();
+	//m_flyCamera.SetSpeed();
 	m_camera.update(deltaTime);
-	m_flyCamera.update(deltaTime);
+	//m_flyCamera.update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -103,8 +103,8 @@ void GraphicsApp::draw() {
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
+	glm::mat4 projectionMatrix = m_statCam.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_statCam.GetViewMatrix();
 
 	//Bind the shader
 	m_phongShader.bind();
@@ -130,7 +130,9 @@ void GraphicsApp::draw() {
 	#pragma region SoulSpear
 	// =========================================
 	m_texturedShader.bind();
-	pvm = projectionMatrix * viewMatrix * m_spearTransform;
+
+	m_modelTransform = m_spearTransform;
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
 
 	m_spearMesh.draw();
@@ -251,7 +253,9 @@ void GraphicsApp::DrawPlanets()
 
 bool GraphicsApp::LaunchSahders()
 {
-	#pragma region LoadedShaders
+#pragma region LaunchShaders
+
+	#pragma region Shader
 	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
 	if (m_shader.link() == false)
@@ -259,7 +263,9 @@ bool GraphicsApp::LaunchSahders()
 		printf("Simple Shader Error: %s\n", m_shader.getLastError());
 		return false;
 	}
+	#pragma endregion
 
+	#pragma region PhongShader
 	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
 	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
 	if (m_phongShader.link() == false)
@@ -267,9 +273,11 @@ bool GraphicsApp::LaunchSahders()
 		printf("phong Shader Error: %s\n", m_phongShader.getLastError());
 		return false;
 	}
+	#pragma endregion
 
-	m_texturedShader.loadShader(aie::eShaderStage::VERTEX,"./shaders/textured.vert");
-	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT,"./shaders/textured.frag");
+	#pragma region TexturedShader/GridShader
+	m_texturedShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/textured.vert");
+	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/textured.frag");
 	if (m_texturedShader.link() == false)
 	{
 		printf("Textured Shader Error: %s\n", m_texturedShader.getLastError());
@@ -281,21 +289,24 @@ bool GraphicsApp::LaunchSahders()
 		printf("failed to load the textures, please check file path!\n");
 		return false;
 	}
+	#pragma endregion
 
 	Mesh::Vertex verticies[4];
 	verticies[0].position = { -0.5 ,0 ,  0.5 ,1 };
-	verticies[1].position = {  0.5 ,0 ,  0.5 ,1 };
+	verticies[1].position = { 0.5 ,0 ,  0.5 ,1 };
 	verticies[2].position = { -0.5 ,0 , -0.5 ,1 };
-	verticies[3].position = {  0.5 ,0 , -0.5 ,1 };
+	verticies[3].position = { 0.5 ,0 , -0.5 ,1 };
 
 	unsigned int indicies[6] = { 0, 1, 2, 2, 1, 3 };
 
 	m_quadMesh.InitialiseQuad();
-	m_quadTransform = { 
+	m_quadTransform = {
 		10 ,0  ,0  ,0 ,
 		0  ,10 ,0  ,0 ,
 		0  ,0  ,10 ,0 ,
 		0  ,0  ,0  ,1 };
+
+	#pragma region BunnyMesh / Transform
 
 	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
 	{
@@ -308,6 +319,9 @@ bool GraphicsApp::LaunchSahders()
 		0    ,0    ,0.1f ,0 ,
 		0    ,0    ,0    ,1
 	};
+	#pragma endregion
+
+	#pragma region SpearMesg / Transform
 
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
@@ -320,8 +334,10 @@ bool GraphicsApp::LaunchSahders()
 		0  ,0  ,1  ,0,
 		0  ,0  ,0  ,1 };
 
-	return true;
 	#pragma endregion
+
+	return true;
+#pragma endregion
 }
 
 void GraphicsApp::CreateBox()

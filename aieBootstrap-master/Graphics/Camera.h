@@ -24,6 +24,7 @@ protected:
 	float m_theta;
 	float m_phi;
 	glm::vec3 m_position;
+	glm::vec4 m_rotation;
 
 	float m_lastMouseX;
 	float m_lastMouseY;
