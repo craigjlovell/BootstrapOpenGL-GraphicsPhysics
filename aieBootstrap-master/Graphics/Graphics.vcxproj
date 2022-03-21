@@ -173,6 +173,7 @@
     <ClCompile Include="Planet.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SolarSystem.cpp" />
+    <ClCompile Include="StationaryCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="Planet.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SolarSystem.h" />
+    <ClInclude Include="StationaryCamera.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>

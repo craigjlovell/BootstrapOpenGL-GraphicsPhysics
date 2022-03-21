@@ -2,11 +2,14 @@
 
 #include "Application.h"
 #include <glm/mat4x4.hpp>
+
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
+
 #include "Camera.h"
 #include "FlyCamera.h"
+#include "StationaryCamera.h"
 
 class GraphicsApp : public aie::Application {
 public:
@@ -22,6 +25,8 @@ public:
 
 	glm::mat4 Rotation(glm::mat4 matrix, char axis, float rotationAmount);
 
+	glm::mat4 MakeScale(glm::mat4 matrix, char axis, float x, float y, float z);
+
 	void DrawPlanets();
 
 protected:
@@ -35,12 +40,17 @@ protected:
 	void CreateHex();
 
 	void CreateGrid();
+	
+	aie::Texture		m_gridTexture;
+	aie::Texture		m_spearTexture;
 
 	aie::ShaderProgram	m_shader;
 	aie::ShaderProgram	m_phongShader;
+	aie::ShaderProgram	m_texturedShader;
 
 	Camera				m_camera;
 	FlyCamera			m_flyCamera;
+	StationaryCamera	m_statCam;
 
 	glm::mat4			m_modelTransform;
 
@@ -51,6 +61,10 @@ protected:
 	// Standford Bunny Data
 	aie::OBJMesh		m_bunnyMesh;
 	glm::mat4			m_bunnyTransform;
+
+	// Soulspear data
+	aie::OBJMesh		m_spearMesh;
+	glm::mat4			m_spearTransform;
 
 	// camera transforms
 	glm::mat4			m_viewMatrix;

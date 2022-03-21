@@ -15,6 +15,8 @@ public:
 
 	glm::mat4 GetProjectionMatrix(float w, float h);
 
+	glm::mat4 WorldTransform();
+
 	
 
 protected:

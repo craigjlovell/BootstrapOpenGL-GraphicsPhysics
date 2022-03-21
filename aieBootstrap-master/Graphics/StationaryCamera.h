@@ -5,16 +5,11 @@ class StationaryCamera : public Camera
 public:
 
 	StationaryCamera();
+	StationaryCamera(glm::vec3 pos, glm::mat4 rot);
 	~StationaryCamera();
-
-	virtual void update();
-
-	void SetPosition();
 
 
 protected:
-
-	glm::vec3 m_position;
 
 private:
 

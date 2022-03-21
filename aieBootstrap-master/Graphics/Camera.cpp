@@ -32,3 +32,8 @@ glm::mat4 Camera::GetProjectionMatrix(float w, float h)
 	return glm::perspective(glm::pi<float>() * 0.25f, w / h, 0.1f, 1000.0f);
 }
 
+glm::mat4 Camera::WorldTransform()
+{
+	return WorldTransform();
+}
+

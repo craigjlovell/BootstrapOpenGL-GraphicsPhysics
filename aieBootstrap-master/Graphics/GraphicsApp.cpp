@@ -13,7 +13,8 @@ using glm::vec4;
 using glm::mat4;
 using aie::Gizmos;
 
-GraphicsApp::GraphicsApp() {
+GraphicsApp::GraphicsApp() 
+{
 
 }
 
@@ -35,7 +36,7 @@ bool GraphicsApp::startup() {
 	m_light.direction = { 1,-1,1 };
 	m_light.color = { 1,1,1 };
 	m_ambientLight = { 1.0f,1.0f,1.0f };
-
+	m_statCam = StationaryCamera();
 	return LaunchSahders();
 }
 
@@ -73,6 +74,8 @@ void GraphicsApp::update(float deltaTime) {
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 2.0f);
+
+
 	ImGui::End();
 
 	m_flyCamera.SetSpeed();
@@ -89,8 +92,6 @@ void GraphicsApp::update(float deltaTime) {
 		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', -0.1f);
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
 		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', 0.1f);
-
-	
 
 	//DrawPlanets();
 }
@@ -114,12 +115,10 @@ void GraphicsApp::draw() {
 	m_phongShader.bindUniform("LightColor", m_light.color);
 	m_phongShader.bindUniform("LightDirection", m_light.direction);
 
-	m_phongShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
+	m_phongShader.bindUniform("CameraPosition", m_statCam.GetPosition());
 
 	// Bind the transform
 	//auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
-	
-	// Bind the transform
 	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_phongShader.bindUniform("ProjectionViewModel", pvm);
 
@@ -128,17 +127,34 @@ void GraphicsApp::draw() {
 	// Draw the quad
 	m_bunnyMesh.draw();
 
+	#pragma region SoulSpear
+	// =========================================
+	m_texturedShader.bind();
+	pvm = projectionMatrix * viewMatrix * m_spearTransform;
+	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
+
+	m_spearMesh.draw();
+
+	// =========================================
+	#pragma endregion
+
 	// Bind the shader
-	m_phongShader.bind();
+	m_texturedShader.bind();
 
 	m_modelTransform = m_quadTransform;
 
 	// Bind the transform
 	pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_phongShader.bindUniform("ProjectionViewModel", pvm);
+	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
 
 	// Simple binding for lightning data based on model used
-	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+	//m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+
+	// Bind the texture at the location
+	m_texturedShader.bindUniform("diffuseTexture", 0);
+
+	// Bind the texture to the specific location
+	m_gridTexture.bind(0);
 
 	// Draw quad
 	m_quadMesh.draw();
@@ -178,13 +194,28 @@ glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmoun
 	if (std::tolower(axis) == 'z')
 	{
 		tempMat = {
-		cos, -sin,	0,	0,
-		sin,  cos,	0,	0,
-		0,	    0,	1,	0,
-		0,		0,	0,	1
+			cos,	-sin,	0,		0,
+			sin,	 cos,	0,		0,
+			0,		 0,		1,		0,
+			0,		 0,		0,		1
 		};
 	}
 
+	return matrix * tempMat;
+}
+
+glm::mat4 GraphicsApp::MakeScale(glm::mat4 matrix, char axis, float x, float y, float z)
+{
+	glm::mat4 tempMat;
+	if (std::tolower(axis) == 's')
+	{
+		tempMat = {
+			x,		0,		0,		0,
+			0,		y,		0,		0,
+			0,		0,		z,		0,
+			0,		0,		0,		1
+		};
+	}
 	return matrix * tempMat;
 }
 
@@ -220,9 +251,9 @@ void GraphicsApp::DrawPlanets()
 
 bool GraphicsApp::LaunchSahders()
 {
+	#pragma region LoadedShaders
 	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
 	m_shader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
-	
 	if (m_shader.link() == false)
 	{
 		printf("Simple Shader Error: %s\n", m_shader.getLastError());
@@ -231,10 +262,23 @@ bool GraphicsApp::LaunchSahders()
 
 	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
 	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
-
 	if (m_phongShader.link() == false)
 	{
 		printf("phong Shader Error: %s\n", m_phongShader.getLastError());
+		return false;
+	}
+
+	m_texturedShader.loadShader(aie::eShaderStage::VERTEX,"./shaders/textured.vert");
+	m_texturedShader.loadShader(aie::eShaderStage::FRAGMENT,"./shaders/textured.frag");
+	if (m_texturedShader.link() == false)
+	{
+		printf("Textured Shader Error: %s\n", m_texturedShader.getLastError());
+		return false;
+	}
+
+	if (m_gridTexture.load("./textures/numbered_grid.tga") == false)
+	{
+		printf("failed to load the textures, please check file path!\n");
 		return false;
 	}
 
@@ -244,16 +288,14 @@ bool GraphicsApp::LaunchSahders()
 	verticies[2].position = { -0.5 ,0 , -0.5 ,1 };
 	verticies[3].position = {  0.5 ,0 , -0.5 ,1 };
 
-	unsigned int indicies[6] = { 0,1,2,
-								 2,1,3 };
-
-
+	unsigned int indicies[6] = { 0, 1, 2, 2, 1, 3 };
 
 	m_quadMesh.InitialiseQuad();
-	m_quadTransform = { 10 ,0  ,0  ,0 ,
-						0  ,10 ,0  ,0 ,
-						0  ,0  ,10 ,0 ,
-						0  ,0  ,0  ,1 };
+	m_quadTransform = { 
+		10 ,0  ,0  ,0 ,
+		0  ,10 ,0  ,0 ,
+		0  ,0  ,10 ,0 ,
+		0  ,0  ,0  ,1 };
 
 	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
 	{
@@ -261,14 +303,25 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 	m_bunnyTransform = {
-		0.5f ,0    ,0    ,0 ,
-		0    ,0.5f ,0    ,0 ,
-		0    ,0    ,0.5f ,0 ,
+		0.1f ,0    ,0    ,0 ,
+		0    ,0.1f ,0    ,0 ,
+		0    ,0    ,0.1f ,0 ,
 		0    ,0    ,0    ,1
 	};
 
-	//CreateHex();
+	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
+	{
+		printf("SoulSpear Mesh Error!\n");
+		return false;
+	}
+	m_spearTransform = {
+		1  ,0  ,0  ,0,
+		0  ,1  ,0  ,0,
+		0  ,0  ,1  ,0,
+		0  ,0  ,0  ,1 };
+
 	return true;
+	#pragma endregion
 }
 
 void GraphicsApp::CreateBox()
