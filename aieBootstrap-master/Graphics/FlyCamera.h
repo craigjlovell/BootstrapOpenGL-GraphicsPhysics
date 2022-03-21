@@ -1,6 +1,5 @@
 #pragma once
 #include "Camera.h"
-#include "glm/glm.hpp"
 
 class FlyCamera : public Camera
 {
