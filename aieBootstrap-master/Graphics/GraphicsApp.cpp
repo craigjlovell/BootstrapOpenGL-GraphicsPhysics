@@ -36,7 +36,7 @@ bool GraphicsApp::startup() {
 	m_light.direction = { 1,-1,1 };
 	m_light.color = { 1,1,1 };
 	m_ambientLight = { 1.0f,1.0f,1.0f };
-	m_statCam = StationaryCamera();
+	//m_statCam = StationaryCamera();
 	return LaunchSahders();
 }
 
@@ -73,14 +73,12 @@ void GraphicsApp::update(float deltaTime) {
 
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 2.0f);
-
-
+	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
 
-	//m_flyCamera.SetSpeed();
+	m_flyCamera.SetSpeed();
 	m_camera.update(deltaTime);
-	//m_flyCamera.update(deltaTime);
+	m_flyCamera.update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -103,9 +101,10 @@ void GraphicsApp::draw() {
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_statCam.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_statCam.GetViewMatrix();
+	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
 
+	#pragma region Bunny
 	//Bind the shader
 	m_phongShader.bind();
 
@@ -115,7 +114,7 @@ void GraphicsApp::draw() {
 	m_phongShader.bindUniform("LightColor", m_light.color);
 	m_phongShader.bindUniform("LightDirection", m_light.direction);
 
-	m_phongShader.bindUniform("CameraPosition", m_statCam.GetPosition());
+	m_phongShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
 
 	// Bind the transform
 	//auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
@@ -126,20 +125,45 @@ void GraphicsApp::draw() {
 
 	// Draw the quad
 	m_bunnyMesh.draw();
-
-	#pragma region SoulSpear
-	// =========================================
-	m_texturedShader.bind();
-
-	m_modelTransform = m_spearTransform;
-	pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
-
-	m_spearMesh.draw();
-
-	// =========================================
 	#pragma endregion
 
+	#pragma region SoulSpear
+	m_normalMapShader.bind();
+
+	m_modelTransform = m_spearTransform;
+
+	m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
+	m_normalMapShader.bindUniform("LightColor", m_light.color);
+	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+
+	m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
+
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+
+	m_spearMesh.draw();
+	#pragma endregion
+
+	#pragma region Pokemon
+	m_normalMapShader.bind();
+
+	m_modelTransform = m_pokemonTransform;
+
+	m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
+	m_normalMapShader.bindUniform("LightColor", m_light.color);
+	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+
+	m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
+
+	pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+
+	m_pokemonMesh.draw();
+	#pragma endregion
+
+	#pragma region Textured Quad Mesh
 	// Bind the shader
 	m_texturedShader.bind();
 
@@ -160,9 +184,9 @@ void GraphicsApp::draw() {
 
 	// Draw quad
 	m_quadMesh.draw();
+	#pragma endregion
 
 	//Gizmos::draw(m_projectionMatrix * m_viewMatrix);
-
 	Gizmos::draw(projectionMatrix * viewMatrix);
 }
 
@@ -203,21 +227,6 @@ glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmoun
 		};
 	}
 
-	return matrix * tempMat;
-}
-
-glm::mat4 GraphicsApp::MakeScale(glm::mat4 matrix, char axis, float x, float y, float z)
-{
-	glm::mat4 tempMat;
-	if (std::tolower(axis) == 's')
-	{
-		tempMat = {
-			x,		0,		0,		0,
-			0,		y,		0,		0,
-			0,		0,		z,		0,
-			0,		0,		0,		1
-		};
-	}
 	return matrix * tempMat;
 }
 
@@ -270,7 +279,7 @@ bool GraphicsApp::LaunchSahders()
 	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
 	if (m_phongShader.link() == false)
 	{
-		printf("phong Shader Error: %s\n", m_phongShader.getLastError());
+		printf("Phong Shader Error: %s\n", m_phongShader.getLastError());
 		return false;
 	}
 	#pragma endregion
@@ -291,6 +300,16 @@ bool GraphicsApp::LaunchSahders()
 	}
 	#pragma endregion
 
+	#pragma region NormalMap
+	m_normalMapShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/normalMap.vert");
+	m_normalMapShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/normalMap.frag");
+	if (m_normalMapShader.link() == false)
+	{
+		printf("Normal Map Shader Error: %s\n", m_normalMapShader.getLastError());
+		return false;
+	}
+	#pragma endregion
+
 	Mesh::Vertex verticies[4];
 	verticies[0].position = { -0.5 ,0 ,  0.5 ,1 };
 	verticies[1].position = { 0.5 ,0 ,  0.5 ,1 };
@@ -299,15 +318,16 @@ bool GraphicsApp::LaunchSahders()
 
 	unsigned int indicies[6] = { 0, 1, 2, 2, 1, 3 };
 
+	#pragma region Quad Mesh / Transform
 	m_quadMesh.InitialiseQuad();
 	m_quadTransform = {
 		10 ,0  ,0  ,0 ,
 		0  ,10 ,0  ,0 ,
 		0  ,0  ,10 ,0 ,
 		0  ,0  ,0  ,1 };
+	#pragma endregion
 
 	#pragma region BunnyMesh / Transform
-
 	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
 	{
 		printf("Bunny mesh error!\n");
@@ -322,7 +342,6 @@ bool GraphicsApp::LaunchSahders()
 	#pragma endregion
 
 	#pragma region SpearMesg / Transform
-
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
 		printf("SoulSpear Mesh Error!\n");
@@ -333,7 +352,19 @@ bool GraphicsApp::LaunchSahders()
 		0  ,1  ,0  ,0,
 		0  ,0  ,1  ,0,
 		0  ,0  ,0  ,1 };
+	#pragma endregion
 
+	#pragma region Pokemon / Transform
+	if (m_pokemonMesh.load("./Ivysaur_OBJ/Pokemon.obj", true, true) == false)
+	{
+		printf("Pokemon Mesh Error!\n");
+		return false;
+	}
+	m_pokemonTransform = {
+		1  ,0  ,0  ,0,
+		0  ,1  ,0  ,0,
+		0  ,0  ,1  ,0,
+		5 ,0 ,0  ,1 };
 	#pragma endregion
 
 	return true;

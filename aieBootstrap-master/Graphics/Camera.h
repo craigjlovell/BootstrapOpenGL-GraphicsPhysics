@@ -7,27 +7,53 @@ public:
 	Camera();
 	~Camera();
 
-	virtual void update(float deltaTime);
+	virtual void update(float deltaTime = 0);
 
+	glm::vec3 SetPosition(glm::vec3 a_position);
 	glm::vec3 GetPosition() { return m_position; }
 
-	glm::mat4 GetViewMatrix();
+	void SetRotation(glm::vec3 a_rotation);
+	glm::vec3 GetRotation() { return m_rotation; }
 
+	void SetScale(glm::vec3 a_scale);
+
+	void SetLookAt(glm::vec3 form, glm::vec3 to, glm::vec3 up);
+	void SetPerspective(float fieldOfView, float aspectRatio, float near, float far);
+
+	glm::mat4 GetLocalTransform() { return m_local; }
+
+	glm::mat4 GetWorldTransform();
+
+	//glm::mat4 GetView();
+	//glm::mat4 GetProjection(float w, float h);
+
+	glm::mat4 GetProjectionView(float w, float h);
+	glm::mat4 GetViewMatrix();
 	glm::mat4 GetProjectionMatrix(float w, float h);
 
-	glm::mat4 WorldTransform();
-
-	
-
 protected:
+	void UpdateProjectionViewTransform();
+
+	glm::mat4 m_worldTransform;
+	glm::mat4 m_localTransform;
+	glm::mat4 m_projectionTransform;
+	glm::mat4 m_projectionViewTransform;
 
 	float m_theta;
 	float m_phi;
+
 	glm::vec3 m_position;
 	glm::vec4 m_rotation;
+	glm::vec4 m_scale;
 
 	float m_lastMouseX;
 	float m_lastMouseY;
-private:
+
+	glm::mat4 m_local{
+		1, 0, 0, 0, 
+		0, 1, 0, 0,	
+		0, 0, 1, 0, 
+		0, 0, 0, 1  
+	};
 };
 

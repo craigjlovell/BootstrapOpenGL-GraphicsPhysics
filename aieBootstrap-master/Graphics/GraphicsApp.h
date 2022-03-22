@@ -43,10 +43,12 @@ protected:
 	
 	aie::Texture		m_gridTexture;
 	aie::Texture		m_spearTexture;
+	aie::Texture		m_pokemon;
 
 	aie::ShaderProgram	m_shader;
 	aie::ShaderProgram	m_phongShader;
 	aie::ShaderProgram	m_texturedShader;
+	aie::ShaderProgram	m_normalMapShader;
 
 	Camera				m_camera;
 	FlyCamera			m_flyCamera;
@@ -65,6 +67,10 @@ protected:
 	// Soulspear data
 	aie::OBJMesh		m_spearMesh;
 	glm::mat4			m_spearTransform;
+
+	// RayGun
+	aie::OBJMesh		m_pokemonMesh;
+	glm::mat4			m_pokemonTransform;
 
 	// camera transforms
 	glm::mat4			m_viewMatrix;
