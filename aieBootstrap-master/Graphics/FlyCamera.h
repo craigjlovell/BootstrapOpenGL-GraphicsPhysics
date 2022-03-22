@@ -4,6 +4,7 @@
 class FlyCamera : public Camera
 {
 public:
+
 	float m_speed;
 	FlyCamera();
 	~FlyCamera();

@@ -4,8 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include "Planet.h"
-#include "Mesh.h"
 #include "imgui.h"
+#include "Instance.h"
+#include "Scene.h"
 
 
 using glm::vec3;
@@ -33,20 +34,31 @@ bool GraphicsApp::startup() {
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
-	m_light.direction = { 1,-1,1 };
-	m_light.color = { 1,1,1 };
-	m_ambientLight = { 1.0f,1.0f,1.0f };
+	// Default Light Values
+	Light light;
+	light.direction = { 1, -1, 1 };
+	light.color = { 1, 1, 1 };
+	m_ambientLight = { 1.0f, 1.0f, 1.0f };
+
+	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+
+	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
+	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
+
 	//m_statCam = StationaryCamera();
+
 	return LaunchSahders();
 }
 
 void GraphicsApp::shutdown() {
 
 	Gizmos::destroy();
+	delete m_scene;
 }
 
 void GraphicsApp::update(float deltaTime) {
 
+	m_camera.update(deltaTime);
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
 
@@ -72,12 +84,11 @@ void GraphicsApp::update(float deltaTime) {
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
 
 	ImGui::Begin("Light Settings");
-	ImGui::DragFloat3("Global Light Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light Color", &m_light.color[0], 0.1f, 0.0f, 20.0f);
+	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
 
 	m_flyCamera.SetSpeed();
-	m_camera.update(deltaTime);
 	m_flyCamera.update(deltaTime);
 
 	// quit if we press escape
@@ -103,65 +114,68 @@ void GraphicsApp::draw() {
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
 	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
 	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
+	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
 
 	#pragma region Bunny
 	//Bind the shader
-	m_phongShader.bind();
-
-	m_modelTransform = m_bunnyTransform;
-
-	m_phongShader.bindUniform("AmbientColor", m_ambientLight);
-	m_phongShader.bindUniform("LightColor", m_light.color);
-	m_phongShader.bindUniform("LightDirection", m_light.direction);
-
-	m_phongShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-
-	// Bind the transform
-	//auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
-	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_phongShader.bindUniform("ProjectionViewModel", pvm);
-
-	m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
-
-	// Draw the quad
-	m_bunnyMesh.draw();
+	//m_phongShader.bind();
+	//
+	//m_modelTransform = m_bunnyTransform;
+	//
+	//m_phongShader.bindUniform("AmbientColor", m_ambientLight);
+	//m_phongShader.bindUniform("LightColor", m_light.color);
+	//m_phongShader.bindUniform("LightDirection", m_light.direction);
+	//
+	//m_phongShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
+	//
+	//// Bind the transform
+	////auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
+	//auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	//m_phongShader.bindUniform("ProjectionViewModel", pvm);
+	//
+	//m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
+	//
+	//// Draw the quad
+	//m_bunnyMesh.draw();
 	#pragma endregion
 
 	#pragma region SoulSpear
-	m_normalMapShader.bind();
-
-	m_modelTransform = m_spearTransform;
-
-	m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
-	m_normalMapShader.bindUniform("LightColor", m_light.color);
-	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
-
-	m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
-
-	pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
-	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
-
-	m_spearMesh.draw();
+	//m_normalMapShader.bind();
+	//
+	//m_modelTransform = m_spearTransform;
+	//
+	//m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
+	//m_normalMapShader.bindUniform("LightColor", m_light.color);
+	//m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+	//
+	//m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
+	//
+	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	//m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	//m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+	//
+	//m_spearMesh.draw();
 	#pragma endregion
 
 	#pragma region Pokemon
-	m_normalMapShader.bind();
-
-	m_modelTransform = m_pokemonTransform;
-
-	m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
-	m_normalMapShader.bindUniform("LightColor", m_light.color);
-	m_normalMapShader.bindUniform("LightDirection", m_light.direction);
-
-	m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
-
-	pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
-	m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
-
-	m_pokemonMesh.draw();
+	//m_normalMapShader.bind();
+	//
+	//m_modelTransform = m_pokemonTransform;
+	//
+	//m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
+	//m_normalMapShader.bindUniform("LightColor", m_light.color);
+	//m_normalMapShader.bindUniform("LightDirection", m_light.direction);
+	//
+	//m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
+	//
+	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	//m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
+	//m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
+	//
+	//m_pokemonMesh.draw();
 	#pragma endregion
+
+	m_scene->Draw();
 
 	#pragma region Textured Quad Mesh
 	// Bind the shader
@@ -361,11 +375,17 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 	m_pokemonTransform = {
-		1  ,0  ,0  ,0,
-		0  ,1  ,0  ,0,
-		0  ,0  ,1  ,0,
-		5 ,0 ,0  ,1 };
+		2  ,0  ,0  ,0,
+		0  ,2  ,0  ,0,
+		0  ,0  ,2  ,0,
+		2.5f ,0 ,2.5f  ,1 };
 	#pragma endregion
+
+	for (int i = 0; i < 10; i++)
+		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+
+	m_scene->AddInstance(new Instance(m_pokemonTransform, &m_pokemonMesh, &m_normalMapShader));
+	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
 
 	return true;
 #pragma endregion

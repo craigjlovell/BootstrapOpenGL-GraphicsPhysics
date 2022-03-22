@@ -9,7 +9,7 @@ public:
 
 	virtual void update(float deltaTime = 0);
 
-	glm::vec3 SetPosition(glm::vec3 a_position);
+	void SetPosition(glm::vec3 a_position);
 	glm::vec3 GetPosition() { return m_position; }
 
 	void SetRotation(glm::vec3 a_rotation);
@@ -32,6 +32,7 @@ public:
 	glm::mat4 GetProjectionMatrix(float w, float h);
 
 protected:
+
 	void UpdateProjectionViewTransform();
 
 	glm::mat4 m_worldTransform;

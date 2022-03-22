@@ -20,6 +20,7 @@ public:
 	virtual void draw();
 
 protected:
+
 	unsigned int m_triCount
 				, m_vao  // Vertex Array Object
 				, m_vbo  // Vertex Buffer Object

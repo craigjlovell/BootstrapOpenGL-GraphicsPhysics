@@ -16,15 +16,33 @@ uniform vec3 Ks; // Specular mat color
 float specularPower; // specular Power of mat
 
 uniform vec3 AmbientColor; // Ambient light color
-
 uniform vec3 LightColor; // Diffuse and specular color
 uniform vec3 LightDirection;
+
+const int MAX_LIGHTS = 4;
+uniform int numLights;
+uniform vec3 PointLightColors[MAX_LIGHTS];
+uniform vec3 PointLightPositions[MAX_LIGHTS];
 
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D normalTexture;
 
 out vec4 FragColor;
+
+vec3 Diffuse(vec3 direction, vec3 color, vec3 normal)
+{
+    return color * max(0, dot(normal, -direction));
+}
+
+vec3 Specular(vec3 direction, vec3 color, vec3 normal, vec3 view)
+{
+    vec3 R = reflect(direction, normal);
+
+    float specularTerm = pow(max(0, dot(R, view)), specularPower);
+    return specularTerm * color;
+}
+
 
 void main()
 {
@@ -40,20 +58,37 @@ void main()
     vec3 texSpecular = texture(specularTexture, vTexCoord).rgb;
     vec3 texNormal = texture(normalTexture, vTexCoord).rgb;
 
+
     N = TBN * (texNormal * 2 - 1);
 
     // Then calculate the lambert term (negating light direction)
     float lambertTerm = max(0, min(1, dot(N, -L)));
 
+    // Calculate the diffuse lighting from the global source
+    vec3 diffuseTotal = Diffuse(L, LightColor, N);
+
     vec3 V = normalize(CameraPosition - vPosition.xyz);
     vec3 R = reflect(L, N);
 
-    float specularTerm = pow(max(0, dot(R, V)), specularPower);
+    // Calculate the specular light from the global source
+    vec3 specularTotal = Specular(L, LightColor, N , V);
+
+    for(int i = 0; i < numLights; i++)
+    {
+        vec3 direction = vPosition.xyz - PointLightPositions[i];
+        float distance = length(direction);
+        direction = direction/distance;
+
+        vec3 color = PointLightColors[i] / (distance * distance);
+
+        diffuseTotal += Diffuse(direction, color, N);
+        specularTotal += Specular(direction, color, N, V);
+    }
 
     // Calculate the diffuse, ambiet and specular color of the model
-    vec3 ambient = AmbientColor * Ka * texDiffuse;
-    vec3 diffuse = LightColor * Kd * texDiffuse * lambertTerm;
-    vec3 specular = LightColor * Ks * texSpecular * specularTerm;
+    vec3 ambient  = AmbientColor * Ka * texDiffuse;
+    vec3 diffuse  = Kd * texDiffuse * diffuseTotal;
+    vec3 specular = Ks * texSpecular * specularTotal;
 
     FragColor = vec4(ambient + diffuse + specular, 1);
 }

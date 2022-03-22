@@ -19,9 +19,18 @@ void Camera::update(float deltaTime)
 
 }
 
-glm::vec3 Camera::SetPosition(glm::vec3 a_position)
+void Camera::SetPosition(glm::vec3 a_position)
 {
-	return glm::vec3();
+	glm::mat4 tempMat{
+		1, 0, 0, a_position.x,
+		0, 1, 0, a_position.y,
+		0, 0, 1, a_position.z,
+		0, 0, 0, 1
+	};
+
+	m_localTransform *= tempMat;
+
+	m_position = a_position;
 }
 
 void Camera::SetRotation(glm::vec3 a_rotation)

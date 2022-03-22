@@ -11,6 +11,8 @@
 #include "FlyCamera.h"
 #include "StationaryCamera.h"
 
+class Scene;
+
 class GraphicsApp : public aie::Application {
 public:
 
@@ -24,8 +26,6 @@ public:
 	virtual void draw();
 
 	glm::mat4 Rotation(glm::mat4 matrix, char axis, float rotationAmount);
-
-	glm::mat4 MakeScale(glm::mat4 matrix, char axis, float x, float y, float z);
 
 	void DrawPlanets();
 
@@ -76,13 +76,8 @@ protected:
 	glm::mat4			m_viewMatrix;
 	glm::mat4			m_projectionMatrix;
 
-	struct Light
-	{
-		glm::vec3 direction;
-		glm::vec3 color;
-	};
+	// Light Setup
+	glm::vec3			m_ambientLight;
 
-	Light m_light;
-	glm::vec3 m_ambientLight;
-
+	Scene*				m_scene;
 };
