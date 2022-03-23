@@ -97,7 +97,7 @@ void GraphicsApp::update(float deltaTime) {
 
 	ImGui::Begin("Local Transform");
 	//ImGui::DragFloat("Position", &m_pokemonTransform[3].x, 0.1f, -1.0f, 20.0f);
-	ImGui::DragFloat3("Position", &m_camera.GetLocalTransform()[0].x, 0.1f, -1.0f, 20.0f);
+	ImGui::DragFloat3("Position", &m_camera.GetPosition()[0], 0.1f, -1.0f, 20.0f);
 	ImGui::DragFloat3("Rotation", &m_camera.GetRotation()[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Scale",	  &m_camera.GetScale()[0], 0.1f, -1.0f, 1.0f);
 	ImGui::End();
