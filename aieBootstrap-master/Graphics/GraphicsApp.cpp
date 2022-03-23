@@ -40,12 +40,12 @@ bool GraphicsApp::startup() {
 	light.color = { 1, 1, 1 };
 	m_ambientLight = { 1.0f, 1.0f, 1.0f };
 
-	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+	m_scene = new Scene(&m_statCam, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
 	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
 
-	//m_statCam = StationaryCamera();
+	m_statCam = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
 
 	return LaunchSahders();
 }
@@ -105,77 +105,26 @@ void GraphicsApp::update(float deltaTime) {
 	//DrawPlanets();
 }
 
-void GraphicsApp::draw() {
+void GraphicsApp::draw() 
+{
+	// We nered to bind our rendertarget first
+	//m_renderTarget.bind();
 
 	// wipe the screen to the background colour
 	clearScreen();
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
+	glm::mat4 projectionMatrix = m_statCam.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_statCam.GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
 
-	#pragma region Bunny
-	//Bind the shader
-	//m_phongShader.bind();
-	//
-	//m_modelTransform = m_bunnyTransform;
-	//
-	//m_phongShader.bindUniform("AmbientColor", m_ambientLight);
-	//m_phongShader.bindUniform("LightColor", m_light.color);
-	//m_phongShader.bindUniform("LightDirection", m_light.direction);
-	//
-	//m_phongShader.bindUniform("CameraPosition", m_flyCamera.GetPosition());
-	//
-	//// Bind the transform
-	////auto pvm = m_projectionMatrix * m_viewMatrix * m_modelTransform;
-	//auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	//m_phongShader.bindUniform("ProjectionViewModel", pvm);
-	//
-	//m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
-	//
-	//// Draw the quad
-	//m_bunnyMesh.draw();
-	#pragma endregion
-
-	#pragma region SoulSpear
-	//m_normalMapShader.bind();
-	//
-	//m_modelTransform = m_spearTransform;
-	//
-	//m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
-	//m_normalMapShader.bindUniform("LightColor", m_light.color);
-	//m_normalMapShader.bindUniform("LightDirection", m_light.direction);
-	//
-	//m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
-	//
-	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	//m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
-	//m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
-	//
-	//m_spearMesh.draw();
-	#pragma endregion
-
-	#pragma region Pokemon
-	//m_normalMapShader.bind();
-	//
-	//m_modelTransform = m_pokemonTransform;
-	//
-	//m_normalMapShader.bindUniform("AmbientColor", m_ambientLight);
-	//m_normalMapShader.bindUniform("LightColor", m_light.color);
-	//m_normalMapShader.bindUniform("LightDirection", m_light.direction);
-	//
-	//m_normalMapShader.bindUniform("CameraPosition", m_camera.GetPosition());
-	//
-	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	//m_normalMapShader.bindUniform("ProjectionViewModel", pvm);
-	//m_normalMapShader.bindUniform("ModelMatrix", m_modelTransform);
-	//
-	//m_pokemonMesh.draw();
-	#pragma endregion
-
 	m_scene->Draw();
+	
+	// Unbind the target to return it to the back bufffer
+	//m_renderTarget.unbind();
+
+	//clearScreen();
 
 	#pragma region Textured Quad Mesh
 	// Bind the shader
@@ -187,11 +136,10 @@ void GraphicsApp::draw() {
 	pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	m_texturedShader.bindUniform("ProjectionViewModel", pvm);
 
-	// Simple binding for lightning data based on model used
-	//m_phongShader.bindUniform("ModelMatrix", m_modelTransform);
-
 	// Bind the texture at the location
 	m_texturedShader.bindUniform("diffuseTexture", 0);
+
+	//m_renderTarget.getTarget(0).bind(0);
 
 	// Bind the texture to the specific location
 	m_gridTexture.bind(0);
@@ -200,7 +148,6 @@ void GraphicsApp::draw() {
 	m_quadMesh.draw();
 	#pragma endregion
 
-	//Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 	Gizmos::draw(projectionMatrix * viewMatrix);
 }
 
@@ -276,6 +223,12 @@ void GraphicsApp::DrawPlanets()
 
 bool GraphicsApp::LaunchSahders()
 {
+	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false);
+	{
+
+	}
+
+
 #pragma region LaunchShaders
 
 	#pragma region Shader
@@ -369,7 +322,7 @@ bool GraphicsApp::LaunchSahders()
 	#pragma endregion
 
 	#pragma region Pokemon / Transform
-	if (m_pokemonMesh.load("./Ivysaur_OBJ/Pokemon.obj", true, true) == false)
+	if (m_pokemonMesh.load("./rol/Riolu.obj", true, true) == false)
 	{
 		printf("Pokemon Mesh Error!\n");
 		return false;

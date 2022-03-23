@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "FlyCamera.h"
 #include "StationaryCamera.h"
+#include "RenderTarget.h"
 
 class Scene;
 
@@ -49,6 +50,8 @@ protected:
 	aie::ShaderProgram	m_phongShader;
 	aie::ShaderProgram	m_texturedShader;
 	aie::ShaderProgram	m_normalMapShader;
+
+	aie::RenderTarget	m_renderTarget;
 
 	Camera				m_camera;
 	FlyCamera			m_flyCamera;

@@ -3,13 +3,16 @@
 
 StationaryCamera::StationaryCamera()
 {
-	m_position = glm::vec3{ -8,2,0 };;
+	
 }
-StationaryCamera::StationaryCamera(glm::mat4 mat, glm::vec3 a_position, float deg, glm::vec3 rot)
+StationaryCamera::StationaryCamera(glm::vec3 a_position, glm::vec3 rot)
 {
-	//m_rotation = glm::mat4 matrix;
-	glm::mat4 matrix;
-	matrix = glm::rotate(matrix, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	float thetaR = glm::radians(m_theta);
+	float phiR = glm::radians(m_phi);
+	m_position = glm::vec3{ -5,2,0 };
+	m_phi = 10;
+	m_theta = 10; 
+	m_rotation = { 10,0,0 };
 }
 
 StationaryCamera::~StationaryCamera()

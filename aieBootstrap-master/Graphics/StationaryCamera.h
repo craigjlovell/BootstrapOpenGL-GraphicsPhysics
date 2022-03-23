@@ -5,7 +5,7 @@ class StationaryCamera : public Camera
 public:
 
 	StationaryCamera();
-	StationaryCamera(glm::mat4 mat, glm::vec3 a_position, float deg, glm::vec3 rot);
+	StationaryCamera(glm::vec3 a_position, glm::vec3 rot);
 	~StationaryCamera();
 	glm::mat4 matrix;
 

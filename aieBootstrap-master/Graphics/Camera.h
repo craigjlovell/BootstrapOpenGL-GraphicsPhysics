@@ -13,9 +13,10 @@ public:
 	glm::vec3 GetPosition() { return m_position; }
 
 	void SetRotation(glm::vec3 a_rotation);
-	glm::vec3 GetRotation() { return m_rotation; }
+	glm::vec3 GetRotation();
 
 	void SetScale(glm::vec3 a_scale);
+	glm::vec3 GetScale();
 
 	void SetLookAt(glm::vec3 form, glm::vec3 to, glm::vec3 up);
 	void SetPerspective(float fieldOfView, float aspectRatio, float near, float far);
@@ -36,7 +37,7 @@ protected:
 	void UpdateProjectionViewTransform();
 
 	glm::mat4 m_worldTransform;
-	glm::mat4 m_localTransform;
+	//glm::mat4 m_localTransform;
 	glm::mat4 m_projectionTransform;
 	glm::mat4 m_projectionViewTransform;
 
@@ -44,17 +45,17 @@ protected:
 	float m_phi;
 
 	glm::vec3 m_position;
-	glm::vec4 m_rotation;
-	glm::vec4 m_scale;
+	glm::vec3 m_rotation;
+	glm::vec3 m_scale;
 
 	float m_lastMouseX;
 	float m_lastMouseY;
 
 	glm::mat4 m_local{
-		1, 0, 0, 0, 
-		0, 1, 0, 0,	
-		0, 0, 1, 0, 
-		0, 0, 0, 1  
-	};
+		1, 0, 0, 0, // 0
+		0, 1, 0, 0,	// 1
+		0, 0, 1, 0, // 2
+		0, 0, 0, 1  // 3
+	};//x  y  z  w
 };
 
