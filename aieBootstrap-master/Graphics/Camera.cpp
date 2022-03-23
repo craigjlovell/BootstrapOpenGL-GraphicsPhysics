@@ -1,12 +1,15 @@
 #include "Camera.h"
 #include "glm/ext.hpp"
+#include "glm/glm.hpp"
 #include "Input.h"
 
 Camera::Camera()
 {
 	m_theta = 0;
 	m_phi = 0;
-	m_position = {-10, 2, 0};
+	//SetPosition(glm::vec3(-10, 2, 0));
+	SetRotation(glm::vec3(0, 0, 0));
+	SetScale(glm::vec3(1, 1, 1));
 }
 
 Camera::~Camera()
@@ -21,11 +24,22 @@ void Camera::update(float deltaTime)
 
 void Camera::SetPosition(glm::vec3 a_position)
 {
-	m_local[0].x = a_position.x;
-	m_local[1].x = a_position.y;
-	m_local[2].x = a_position.z;
+	m_local[0].w = a_position.x;
+	m_local[1].w = a_position.y;
+	m_local[2].w = a_position.z;
 
 	m_position = a_position;
+}
+
+glm::vec3 Camera::GetPosition()
+{
+	glm::vec3 tempVec;
+
+	tempVec.x = m_local[0].w;
+	tempVec.y = m_local[1].w;
+	tempVec.z = m_local[2].w;
+
+	return tempVec;
 }
 
 void Camera::SetRotation(glm::vec3 a_rotation)
@@ -54,7 +68,7 @@ void Camera::SetRotation(glm::vec3 a_rotation)
 	m_local[0].x =  _cosZ - GetScale().x;
 	m_local[0].y = -_sinZ;
 	m_local[1].x =  _sinZ;
-	m_local[1].y =  _cosZ + GetScale().y;
+	m_local[1].y =  _cosZ - GetScale().y;
 
 	m_rotation = a_rotation;
 }
@@ -95,7 +109,8 @@ glm::vec3 Camera::GetRotation()
 			q.y = (tempMat[0].z - tempMat[2].x) / S;
 			q.z = (tempMat[1].x - tempMat[0].y) / S;
 		}
-		else if ((tempMat[0].x > tempMat[1].y) & (tempMat[0].x > tempMat[2].z)) {
+		else if (tempMat[0].x > tempMat[1].y && tempMat[0].x > tempMat[2].z)
+		{
 			float S = sqrt(1.0 + tempMat[0].x - tempMat[1].y - tempMat[2].z) * 2; // S=4*qx 
 			q.w = (tempMat[2].y - tempMat[1].z) / S;
 			q.x = 0.25 * S;

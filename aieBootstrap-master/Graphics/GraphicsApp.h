@@ -55,7 +55,7 @@ protected:
 
 	Camera				m_camera;
 	FlyCamera			m_flyCamera;
-	StationaryCamera	m_statCam;
+	StationaryCamera	m_stationaryCamera;
 
 	glm::mat4			m_modelTransform;
 

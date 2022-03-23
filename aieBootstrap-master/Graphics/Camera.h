@@ -10,7 +10,7 @@ public:
 	virtual void update(float deltaTime = 0);
 
 	void SetPosition(glm::vec3 a_position);
-	glm::vec3 GetPosition() { return m_position; }
+	glm::vec3 GetPosition();
 
 	void SetRotation(glm::vec3 a_rotation);
 	glm::vec3 GetRotation();
@@ -40,7 +40,8 @@ protected:
 	//glm::mat4 m_localTransform;
 	glm::mat4 m_projectionTransform;
 	glm::mat4 m_projectionViewTransform;
-
+	glm::mat4 m_viewTransform;
+	
 	float m_theta;
 	float m_phi;
 

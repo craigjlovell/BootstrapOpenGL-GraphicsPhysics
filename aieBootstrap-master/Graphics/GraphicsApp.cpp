@@ -16,6 +16,7 @@ using aie::Gizmos;
 
 GraphicsApp::GraphicsApp() 
 {
+	
 
 }
 
@@ -40,12 +41,14 @@ bool GraphicsApp::startup() {
 	light.color = { 1, 1, 1 };
 	m_ambientLight = { 1.0f, 1.0f, 1.0f };
 
-	m_scene = new Scene(&m_statCam, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+	m_scene = new Scene(&m_camera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
 	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
 
-	m_statCam = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
+	//m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
+	
+	
 
 	return LaunchSahders();
 }
@@ -58,7 +61,7 @@ void GraphicsApp::shutdown() {
 
 void GraphicsApp::update(float deltaTime) {
 
-	m_camera.update(deltaTime);
+	
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
 
@@ -83,13 +86,26 @@ void GraphicsApp::update(float deltaTime) {
 	// Rotate the light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
 
-	ImGui::Begin("Light Settings");
-	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
-	ImGui::End();
+	//m_camera.update(deltaTime);
 
-	m_flyCamera.SetSpeed();
-	m_flyCamera.update(deltaTime);
+	//ImGui::Begin("Light Settings");
+	//ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
+	//ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
+	//ImGui::End();
+
+	
+
+	ImGui::Begin("Local Transform");
+	//ImGui::DragFloat("Position", &m_pokemonTransform[3].x, 0.1f, -1.0f, 20.0f);
+	ImGui::DragFloat3("Position", &m_camera.GetLocalTransform()[0].x, 0.1f, -1.0f, 20.0f);
+	ImGui::DragFloat3("Rotation", &m_camera.GetRotation()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Scale",	  &m_camera.GetScale()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::End();
+	
+	//m_pokemonTransform[3].x = m_pokemonTransform[3].x;
+
+	//m_flyCamera.SetSpeed();
+	//m_flyCamera.update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -101,8 +117,6 @@ void GraphicsApp::update(float deltaTime) {
 		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', -0.1f);
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
 		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', 0.1f);
-
-	//DrawPlanets();
 }
 
 void GraphicsApp::draw() 
@@ -115,9 +129,9 @@ void GraphicsApp::draw()
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_statCam.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_statCam.GetViewMatrix();
-	auto pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	glm::mat4 projectionMatrix = m_camera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_camera.GetViewMatrix();
+	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
 	
@@ -141,11 +155,12 @@ void GraphicsApp::draw()
 
 	//m_renderTarget.getTarget(0).bind(0);
 
-	// Bind the texture to the specific location
+	// Bind the texture to the specific location 
 	m_gridTexture.bind(0);
 
 	// Draw quad
 	m_quadMesh.draw();
+
 	#pragma endregion
 
 	Gizmos::draw(projectionMatrix * viewMatrix);
@@ -223,10 +238,11 @@ void GraphicsApp::DrawPlanets()
 
 bool GraphicsApp::LaunchSahders()
 {
-	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false);
-	{
-
-	}
+	//if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false);
+	//{
+	//	printf("Render Target Error!\n");
+	//	return false;
+	//}
 
 
 #pragma region LaunchShaders
@@ -286,6 +302,7 @@ bool GraphicsApp::LaunchSahders()
 	unsigned int indicies[6] = { 0, 1, 2, 2, 1, 3 };
 
 	#pragma region Quad Mesh / Transform
+	// This needs to be commented to have hex box gird work
 	m_quadMesh.InitialiseQuad();
 	m_quadTransform = {
 		10 ,0  ,0  ,0 ,
@@ -322,24 +339,28 @@ bool GraphicsApp::LaunchSahders()
 	#pragma endregion
 
 	#pragma region Pokemon / Transform
-	if (m_pokemonMesh.load("./rol/Riolu.obj", true, true) == false)
+	if (m_pokemonMesh.load("./ball/pokeball.obj", true, true) == false)
 	{
 		printf("Pokemon Mesh Error!\n");
 		return false;
 	}
 	m_pokemonTransform = {
-		2  ,0  ,0  ,0,
-		0  ,2  ,0  ,0,
-		0  ,0  ,2  ,0,
-		2.5f ,0 ,2.5f  ,1 };
+		0.05f  ,0  ,0  ,0,
+		0  ,0.05f  ,0  ,0,
+		0  ,0  ,0.05f  ,0,
+		2.5f ,0 ,2.5f ,1 };
+	
 	#pragma endregion
 
-	for (int i = 0; i < 10; i++)
-		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+	//for (int i = 0; i < 10; i++)
+	//	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+
+	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
 
 	m_scene->AddInstance(new Instance(m_pokemonTransform, &m_pokemonMesh, &m_normalMapShader));
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
-
+	
+	//CreateHex();
 	return true;
 #pragma endregion
 }
