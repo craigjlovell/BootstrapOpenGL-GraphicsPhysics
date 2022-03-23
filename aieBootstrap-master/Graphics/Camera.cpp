@@ -1,13 +1,12 @@
 #include "Camera.h"
 #include "glm/ext.hpp"
-#include "glm/glm.hpp"
 #include "Input.h"
 
 Camera::Camera()
 {
 	m_theta = 0;
 	m_phi = 0;
-	//SetPosition(glm::vec3(-10, 2, 0));
+	SetPosition(glm::vec3(-10, 2, 0));
 	SetRotation(glm::vec3(0, 0, 0));
 	SetScale(glm::vec3(1, 1, 1));
 }
@@ -19,7 +18,6 @@ Camera::~Camera()
 void Camera::update(float deltaTime)
 {
 	
-
 }
 
 void Camera::SetPosition(glm::vec3 a_position)
@@ -46,61 +44,61 @@ void Camera::SetRotation(glm::vec3 a_rotation)
 {
 	glm::mat4 tempMat;
 	
-	float _cosX = cos(glm::radians(a_rotation.x));
-	float _sinX = sin(glm::radians(a_rotation.x));
+	float cosX = cos(glm::radians(a_rotation.x));
+	float sinX = sin(glm::radians(a_rotation.x));
 
-	m_local[1].y =  _cosX - GetScale().y;
-	m_local[1].z = -_sinX;
-	m_local[2].y =  _sinX;
-	m_local[2].z =  _cosX + GetScale().z;
+	m_local[1].y =  cosX - GetScale().y;
+	m_local[1].z = -sinX;
+	m_local[2].y =  sinX;
+	m_local[2].z =  cosX + GetScale().z;
 
-	float _cosY = cos(glm::radians(a_rotation.y));
-	float _sinY = sin(glm::radians(a_rotation.y));
+	float cosY = cos(glm::radians(a_rotation.y));
+	float sinY = sin(glm::radians(a_rotation.y));
 
-	m_local[0].x =  _cosY + GetScale().x;
-	m_local[0].z =  _sinY;
-	m_local[2].x = -_sinY;
-	m_local[2].z =  _cosY - GetScale().z;
+	m_local[0].x =  cosY + GetScale().x;
+	m_local[0].z =  sinY;
+	m_local[2].x = -sinY;
+	m_local[2].z =  cosY - GetScale().z;
 
-	float _cosZ = cos(glm::radians(a_rotation.z));
-	float _sinZ = sin(glm::radians(a_rotation.z));
+	float cosZ = cos(glm::radians(a_rotation.z));
+	float sinZ = sin(glm::radians(a_rotation.z));
 
-	m_local[0].x =  _cosZ - GetScale().x;
-	m_local[0].y = -_sinZ;
-	m_local[1].x =  _sinZ;
-	m_local[1].y =  _cosZ - GetScale().y;
+	m_local[0].x =  cosZ - GetScale().x;
+	m_local[0].y = -sinZ;
+	m_local[1].x =  sinZ;
+	m_local[1].y =  cosZ - GetScale().y;
 
 	m_rotation = a_rotation;
 }
 
 glm::vec3 Camera::GetRotation()
 {
-	glm::mat4 tempMat;
 	glm::vec3 tempVec;
 
-	tempMat = {
+	glm::mat4 tempMat = 
+	{
 		1,0,0,0,
 		0,1,0,0,
 		0,0,1,0,
 		0,0,0,1
 	};
 
-	glm::vec3 Scale = GetScale();
+	glm::vec3 scale = GetScale();
 
-	tempMat[0].x = m_local[0].x / Scale.x;
-	tempMat[1].x = m_local[1].x / Scale.x;
-	tempMat[2].x = m_local[2].x / Scale.x;
-
-	tempMat[0].y = m_local[0].y / Scale.y;
-	tempMat[1].y = m_local[1].y / Scale.y;
-	tempMat[2].y = m_local[2].y / Scale.y;
-
-	tempMat[0].z = m_local[0].z / Scale.z;
-	tempMat[1].z = m_local[1].z / Scale.z;
-	tempMat[2].z = m_local[2].z / Scale.z;
+	tempMat[0].x = m_local[0].x / scale.x;
+	tempMat[1].x = m_local[1].x / scale.x;
+	tempMat[2].x = m_local[2].x / scale.x;
+								  
+	tempMat[0].y = m_local[0].y / scale.y;
+	tempMat[1].y = m_local[1].y / scale.y;
+	tempMat[2].y = m_local[2].y / scale.y;
+								  
+	tempMat[0].z = m_local[0].z / scale.z;
+	tempMat[1].z = m_local[1].z / scale.z;
+	tempMat[2].z = m_local[2].z / scale.z;
 
 	float t = tempMat[0].x + tempMat[1].y + tempMat[2].z;
-	glm::vec4 q = {0, 0, 0, 0};
+	glm::vec4 q = {0.f, 0.f, 0.f, 0.f};
 
 		if (t > 0) {
 			float S = sqrt(t + 1.0) * 2;
@@ -136,9 +134,9 @@ glm::vec3 Camera::GetRotation()
 
 void Camera::SetScale(glm::vec3 a_scale)
 {
-	m_local[0].x = a_scale.x;
-	m_local[1].x = a_scale.y;
-	m_local[2].x = a_scale.z;
+	m_local[0].x + a_scale.x;
+	m_local[1].y + a_scale.y;
+	m_local[2].z + a_scale.z;
 
 	m_scale = a_scale;
 }
@@ -168,7 +166,8 @@ void Camera::SetPerspective(float fieldOfView, float aspectRatio, float, float)
 
 glm::mat4 Camera::GetWorldTransform()
 {
-	glm::mat4 tempMat{
+	glm::mat4 tempMat =
+	{
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
@@ -176,16 +175,6 @@ glm::mat4 Camera::GetWorldTransform()
 	};
 	return m_local;
 }
-
-//glm::mat4 Camera::GetView()
-//{
-//	return glm::mat4();
-//}
-
-//glm::mat4 Camera::GetProjection(float w, float h)
-//{
-//	return glm::mat4();
-//}
 
 glm::mat4 Camera::GetProjectionView(float w, float h)
 {
@@ -207,6 +196,11 @@ glm::mat4 Camera::GetProjectionMatrix(float w, float h)
 
 void Camera::UpdateProjectionViewTransform()
 {
+}
+
+glm::mat4 Camera::MakeTransform()
+{
+	return glm::translate(glm::mat4(1), m_position);
 }
 
 

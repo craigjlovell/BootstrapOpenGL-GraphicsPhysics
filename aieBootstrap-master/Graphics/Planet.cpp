@@ -4,10 +4,10 @@
 
 Planet::Planet(glm::vec3 a_position, float a_size, glm::vec4 a_color, glm::vec3 a_rotation)
 {
-	m_position = a_position;
-	m_size = a_size;
-	m_colour = a_color;
-	m_rotation = a_rotation;
+	//m_position = a_position;
+	//m_size = a_size;
+	//m_colour = a_color;
+	//m_rotation = a_rotation;
 }
 
 Planet::~Planet()

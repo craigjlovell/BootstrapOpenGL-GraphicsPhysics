@@ -7,10 +7,12 @@ public:
 	StationaryCamera();
 	StationaryCamera(glm::vec3 a_position, glm::vec3 rot);
 	~StationaryCamera();
-	glm::mat4 matrix;
+	
 
 
 protected:
+
+	glm::mat4 matrix;
 
 private:
 

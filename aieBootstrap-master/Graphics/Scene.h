@@ -24,6 +24,7 @@ struct Light
 class Scene
 {
 public:
+
 	Scene(Camera* a_camera, glm::vec2 a_windowSizem, Light& a_light, glm::vec3 a_ambientLight);
 	~Scene();
 
@@ -45,6 +46,7 @@ public:
 					{ m_pointLights.push_back(Light(a_direction, a_color, a_intensity)); }
 
 protected:
+
 	Camera* m_camera;
 	glm::vec2 m_windowSize;
 

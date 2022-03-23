@@ -21,11 +21,21 @@ public:
 	void Draw(Scene* a_scene);
 
 	static glm::mat4 MakeTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale);
+	void SetTransform(glm::mat4 a_transform) { m_transform = a_transform; }
+	glm::mat4& GetTransform() { return m_transform;  }
 
+	glm::vec3 GetRotation();
+
+	glm::vec3 GetScale();
+
+	glm::vec3 GetPosition();
+
+	
 protected:
-
+	glm::vec3 m_rotation;
 	glm::mat4 m_transform;
 	aie::OBJMesh* m_mesh;
 	aie::ShaderProgram* m_shader;
+
 };
 

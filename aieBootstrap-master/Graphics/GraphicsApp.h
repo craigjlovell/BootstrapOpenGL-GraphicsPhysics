@@ -13,6 +13,7 @@
 #include "RenderTarget.h"
 
 class Scene;
+class Instance;
 
 class GraphicsApp : public aie::Application {
 public:
@@ -83,4 +84,6 @@ protected:
 	glm::vec3			m_ambientLight;
 
 	Scene*				m_scene;
+
+	Instance*			m_pokemonIns;
 };

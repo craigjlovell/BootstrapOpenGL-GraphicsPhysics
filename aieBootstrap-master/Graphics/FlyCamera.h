@@ -5,7 +5,7 @@ class FlyCamera : public Camera
 {
 public:
 
-	float m_speed;
+	
 	FlyCamera();
 	~FlyCamera();
 
@@ -16,7 +16,8 @@ public:
 
 protected:
 
-	
+	float m_speed;
+
 private:
 };
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
+
 class Camera
 {
 public:
@@ -22,22 +23,21 @@ public:
 	void SetPerspective(float fieldOfView, float aspectRatio, float near, float far);
 
 	glm::mat4 GetLocalTransform() { return m_local; }
-
 	glm::mat4 GetWorldTransform();
-
-	//glm::mat4 GetView();
-	//glm::mat4 GetProjection(float w, float h);
 
 	glm::mat4 GetProjectionView(float w, float h);
 	glm::mat4 GetViewMatrix();
 	glm::mat4 GetProjectionMatrix(float w, float h);
 
+	glm::mat4 MakeTransform();
+
 protected:
 
 	void UpdateProjectionViewTransform();
 
+	
+
 	glm::mat4 m_worldTransform;
-	//glm::mat4 m_localTransform;
 	glm::mat4 m_projectionTransform;
 	glm::mat4 m_projectionViewTransform;
 	glm::mat4 m_viewTransform;
@@ -48,15 +48,17 @@ protected:
 	glm::vec3 m_position;
 	glm::vec3 m_rotation;
 	glm::vec3 m_scale;
+	glm::mat4 m_transform;
 
 	float m_lastMouseX;
 	float m_lastMouseY;
 
-	glm::mat4 m_local{
-		1, 0, 0, 0, // 0
-		0, 1, 0, 0,	// 1
-		0, 0, 1, 0, // 2
-		0, 0, 0, 1  // 3
-	};//x  y  z  w
+	glm::mat4 m_local =
+	{
+			1,	0,	0,	0,	// 0
+			0,	1,	0,	0,	// 1
+			0,	0,	1,	0,	// 2
+			0,	0,	0,	1	// 3
+	};//	x	y	z	w
 };
 

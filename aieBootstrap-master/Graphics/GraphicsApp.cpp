@@ -8,7 +8,6 @@
 #include "Instance.h"
 #include "Scene.h"
 
-
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
@@ -41,14 +40,13 @@ bool GraphicsApp::startup() {
 	light.color = { 1, 1, 1 };
 	m_ambientLight = { 1.0f, 1.0f, 1.0f };
 
-	m_scene = new Scene(&m_camera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
 	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
 
-	//m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
-	
-	
+	m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
 
 	return LaunchSahders();
 }
@@ -86,26 +84,29 @@ void GraphicsApp::update(float deltaTime) {
 	// Rotate the light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
 
-	//m_camera.update(deltaTime);
-
-	//ImGui::Begin("Light Settings");
-	//ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
-	//ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
-	//ImGui::End();
-
 	
 
-	ImGui::Begin("Local Transform");
-	//ImGui::DragFloat("Position", &m_pokemonTransform[3].x, 0.1f, -1.0f, 20.0f);
-	ImGui::DragFloat3("Position", &m_camera.GetPosition()[0], 0.1f, -1.0f, 20.0f);
-	ImGui::DragFloat3("Rotation", &m_camera.GetRotation()[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Scale",	  &m_camera.GetScale()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::Begin("Light Settings");
+	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
-	
-	//m_pokemonTransform[3].x = m_pokemonTransform[3].x;
 
-	//m_flyCamera.SetSpeed();
-	//m_flyCamera.update(deltaTime);
+	
+	ImGui::Begin("Local Transform");
+	ImGui::DragFloat("Position", &m_flyCamera.MakeTransform()[0].x, 0.1f, -1.0f, 20.0f);
+	ImGui::DragFloat3("Rotation", &m_flyCamera.GetRotation()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Scale", &m_flyCamera.GetScale()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::End();
+
+	ImGui::Begin("Object Local Transform");
+	ImGui::DragFloat3("Position", (float *) (& m_pokemonIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
+	//ImGui::DragFloat3("Rotation", (float *) (& m_pokemonIns->GetScale()[0]), 0.1f, -20.0f, 20.0f);
+	//ImGui::DragFloat3("Position", (float *) (& m_pokemonIns->()[3]), 0.1f, -1.0f, 20.0f);
+	ImGui::End();
+
+	m_camera.update(deltaTime);
+	m_flyCamera.SetSpeed();
+	m_flyCamera.update(deltaTime);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -129,8 +130,8 @@ void GraphicsApp::draw()
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_camera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_camera.GetViewMatrix();
+	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
@@ -357,7 +358,8 @@ bool GraphicsApp::LaunchSahders()
 
 	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
 
-	m_scene->AddInstance(new Instance(m_pokemonTransform, &m_pokemonMesh, &m_normalMapShader));
+	m_pokemonIns = new Instance(m_pokemonTransform, &m_pokemonMesh, &m_normalMapShader);
+	m_scene->AddInstance(m_pokemonIns);
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
 	
 	//CreateHex();
