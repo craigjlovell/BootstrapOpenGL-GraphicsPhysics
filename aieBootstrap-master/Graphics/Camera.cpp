@@ -198,10 +198,10 @@ void Camera::UpdateProjectionViewTransform()
 {
 }
 
-glm::mat4 Camera::MakeTransform()
-{
-	return glm::translate(glm::mat4(1), m_position);
-}
+//glm::mat4 Camera::MakeTransform()
+//{
+//	return glm::translate(glm::mat4(1), m_position);
+//}
 
 
 

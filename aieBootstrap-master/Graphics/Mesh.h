@@ -16,6 +16,7 @@ public:
 
 	void InitialiseQuad();
 	void Initialise(unsigned int a_vertexCount, const Vertex* a_vertices, unsigned int a_indexCount = 0, unsigned int* a_indices = nullptr);
+	void InitialiseFullScreenQuad();
 
 	virtual void draw();
 

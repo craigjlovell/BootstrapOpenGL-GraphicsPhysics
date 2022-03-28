@@ -19,7 +19,6 @@ Instance::Instance(glm::mat4 a_transform, aie::OBJMesh* a_mesh, aie::ShaderProgr
 Instance::Instance(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale, aie::OBJMesh* a_mesh, aie::ShaderProgram* a_shader) :
 	m_mesh(a_mesh), m_shader(a_shader)
 {
-	m_rotation = a_eulerAngles;
 	m_transform = MakeTransform(a_position, a_eulerAngles, a_scale);
 }
 
@@ -64,15 +63,8 @@ glm::mat4 Instance::MakeTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles,
 			glm::radians(a_eulerAngles.x), glm::vec3(1, 0, 0))
 		* glm::scale(glm::mat4(1), a_scale);
 }
-glm::vec3 Instance::GetRotation()
+
+void Instance::SetRotation(float a_eulerAngles)
 {
-	return m_rotation; 
-}
-glm::vec3 Instance::GetScale()
-{
-	return glm::vec3();
-}
-glm::vec3 Instance::GetPosition()
-{
-	return glm::vec3();
+	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles), glm::vec3(0, 1, 0)));
 }

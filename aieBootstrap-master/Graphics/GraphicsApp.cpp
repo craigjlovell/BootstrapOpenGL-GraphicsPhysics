@@ -1,10 +1,13 @@
 #include "GraphicsApp.h"
 #include "Gizmos.h"
 #include "Input.h"
+
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
 #include "Planet.h"
 #include "imgui.h"
+
 #include "Instance.h"
 #include "Scene.h"
 
@@ -19,12 +22,13 @@ GraphicsApp::GraphicsApp()
 
 }
 
-GraphicsApp::~GraphicsApp() {
+GraphicsApp::~GraphicsApp() 
+{
 
 }
 
-bool GraphicsApp::startup() {
-	
+bool GraphicsApp::startup() 
+{
 	setBackgroundColour(0.25f, 0.25f, 0.25f);
 
 	// initialise gizmo primitive counts
@@ -43,23 +47,22 @@ bool GraphicsApp::startup() {
 	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 
-	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 50);
+	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 25);
 	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
 
-	m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
+	//m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
 
 	return LaunchSahders();
 }
 
-void GraphicsApp::shutdown() {
-
+void GraphicsApp::shutdown() 
+{
 	Gizmos::destroy();
 	delete m_scene;
 }
 
-void GraphicsApp::update(float deltaTime) {
-
-	
+void GraphicsApp::update(float deltaTime) 
+{
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
 
@@ -84,23 +87,16 @@ void GraphicsApp::update(float deltaTime) {
 	// Rotate the light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
 
-	
-
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
 
-	
-	ImGui::Begin("Local Transform");
-	ImGui::DragFloat("Position", &m_flyCamera.MakeTransform()[0].x, 0.1f, -1.0f, 20.0f);
-	ImGui::DragFloat3("Rotation", &m_flyCamera.GetRotation()[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Scale", &m_flyCamera.GetScale()[0], 0.1f, -1.0f, 1.0f);
-	ImGui::End();
-
 	ImGui::Begin("Object Local Transform");
-	ImGui::DragFloat3("Position", (float *) (& m_pokemonIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
-	//ImGui::DragFloat3("Rotation", (float *) (& m_pokemonIns->GetScale()[0]), 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat3("Position", (float *) (&m_pokemonIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
+	float change = 0;
+	ImGui::DragFloat("Rotation", &change, 0.1f, -20.0f, 20.0f);
+	m_pokemonIns->SetRotation(change);
 	//ImGui::DragFloat3("Position", (float *) (& m_pokemonIns->()[3]), 0.1f, -1.0f, 20.0f);
 	ImGui::End();
 
@@ -115,31 +111,33 @@ void GraphicsApp::update(float deltaTime) {
 		quit();
 	
 	if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
-		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', -0.1f);
+		glm::rotate(m_pokemonTransform, -0.8f, glm::vec3(0, 1, 0));
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
-		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', 0.1f);
+		glm::rotate(m_pokemonTransform, 0.8f, glm::vec3( 0, 1, 0));
 }
 
 void GraphicsApp::draw() 
 {
 	// We nered to bind our rendertarget first
-	//m_renderTarget.bind();
+	m_renderTarget.bind();
 
 	// wipe the screen to the background colour
 	clearScreen();
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix(getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
 	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
-	
-	// Unbind the target to return it to the back bufffer
-	//m_renderTarget.unbind();
 
-	//clearScreen();
+	//m_shader.bind();
+	//m_modelTransform = m_quadTransform;
+	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
+	//m_shader.bindUniform("ProjectionViewModel", pvm);
+	//m_quadMesh.draw();
+
 
 	#pragma region Textured Quad Mesh
 	// Bind the shader
@@ -153,7 +151,6 @@ void GraphicsApp::draw()
 
 	// Bind the texture at the location
 	m_texturedShader.bindUniform("diffuseTexture", 0);
-
 	//m_renderTarget.getTarget(0).bind(0);
 
 	// Bind the texture to the specific location 
@@ -165,6 +162,19 @@ void GraphicsApp::draw()
 	#pragma endregion
 
 	Gizmos::draw(projectionMatrix * viewMatrix);
+
+	// Unbind the target to return it to the back bufffer
+	m_renderTarget.unbind();
+	clearScreen();
+
+	// Bind the post processing shader and texture
+	m_advancePostShader.bind();
+	m_advancePostShader.bindUniform("colorTarget", 0);
+	m_advancePostShader.bindUniform("postProcessTarget", m_postProcessEffect);
+	m_renderTarget.getTarget(0).bind(0);
+
+	m_screenQuad.draw();
+
 }
 
 glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmount)
@@ -207,45 +217,13 @@ glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmoun
 	return matrix * tempMat;
 }
 
-void GraphicsApp::DrawPlanets()
-{
-	Planet* sun = new Planet(glm::vec3(0, 0, 0), 1, glm::vec4(1,0.8,0,1), glm::vec3(0,0,0));
-	sun->CreatePlanet();
-
-	Planet* mercury = new Planet(glm::vec3(1.5, 0, 2), 0.24, glm::vec4(0, 0, 0.8, 1), glm::vec3(0, 0, 0));
-	mercury->CreatePlanet();
-
-	Planet* venus = new Planet(glm::vec3(3, 0, 0), 0.6, glm::vec4(0.8, 0, 0, 1), glm::vec3(0, 0, 0));
-	venus->CreatePlanet();
-
-	Planet* earth = new Planet(glm::vec3(4, 0, -1), 0.63, glm::vec4(0, .5, .5, 1), glm::vec3(0, 0, 0));
-	earth->CreatePlanet();
-
-	Planet* mars = new Planet(glm::vec3(5, 0, 1), 0.33, glm::vec4(1, 0, 0, 1), glm::vec3(0, 0, 0));
-	mars->CreatePlanet();
-	
-	Planet* jupiter = new Planet(glm::vec3(6, 0, 0), 0.85, glm::vec4(0.5, 0, 0, 1), glm::vec3(0, 0, 0));
-	jupiter->CreatePlanet();
-
-	Planet* saturn = new Planet(glm::vec3(7, 0, 2), 0.8, glm::vec4(0.8, 1, 1, 1), glm::vec3(0, 0, 0));
-	saturn->CreatePlanet();
-
-	Planet* uranus = new Planet(glm::vec3(8, 0, -2), 0.75, glm::vec4(0.8, 0, 0, 1), glm::vec3(0, 0, 0));
-	uranus->CreatePlanet();
-
-	Planet* neptune = new Planet(glm::vec3(9, 0, 0), 0.7, glm::vec4(0.8, 0, 0, 1), glm::vec3(0, 0, 0));
-	neptune->CreatePlanet();
-}
-
 bool GraphicsApp::LaunchSahders()
 {
-	//if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false);
-	//{
-	//	printf("Render Target Error!\n");
-	//	return false;
-	//}
-
-
+	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
+	{
+		printf("Render Target Error!\n");
+		return false;
+	}
 #pragma region LaunchShaders
 
 	#pragma region Shader
@@ -293,6 +271,29 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 	#pragma endregion
+
+	#pragma region PostShader
+	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/post.vert");
+	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post.frag");
+	if (m_postShader.link() == false)
+	{
+		printf("Post-Porcessing Shader Error: %s\n", m_postShader.getLastError());
+		return false;
+	}
+	#pragma endregion
+
+	#pragma region AdvancePostShader
+	m_advancePostShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/advancePost.vert");
+	m_advancePostShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/advancePost.frag");
+	if (m_advancePostShader.link() == false)
+	{
+		printf("Post-Porcessing Shader Error: %s\n", m_advancePostShader.getLastError());
+		return false;
+	}
+	#pragma endregion
+
+	// CREATE THE FULLSCREEN QUAD FOR POST PROCESSING EFFECTS
+	m_screenQuad.InitialiseFullScreenQuad();
 
 	Mesh::Vertex verticies[4];
 	verticies[0].position = { -0.5 ,0 ,  0.5 ,1 };
@@ -349,20 +350,21 @@ bool GraphicsApp::LaunchSahders()
 		0.05f  ,0  ,0  ,0,
 		0  ,0.05f  ,0  ,0,
 		0  ,0  ,0.05f  ,0,
-		2.5f ,0 ,2.5f ,1 };
+		0 ,0 ,0 ,1 };
 	
 	#pragma endregion
 
-	//for (int i = 0; i < 10; i++)
-	//	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+	for (int i = 0; i < 10; i++)
+		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
 
-	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
-
+	//m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
 	m_pokemonIns = new Instance(m_pokemonTransform, &m_pokemonMesh, &m_normalMapShader);
 	m_scene->AddInstance(m_pokemonIns);
+
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
 	
 	//CreateHex();
+	//CreateBox();
 	return true;
 #pragma endregion
 }
@@ -389,7 +391,11 @@ void GraphicsApp::CreateBox()
 								 5,4,7,7,4,6  // bottom
 	};
 
-	m_quadMesh.Initialise(8, verticies, 36, indicies);
+	m_cubeMesh.Initialise(8, verticies, 36, indicies);
+
+	m_cubeTransform = {
+
+	};
 }
 
 void GraphicsApp::CreatePyramid()
@@ -409,7 +415,7 @@ void GraphicsApp::CreatePyramid()
 								 3,4,1,
 								 1,4,0};
 
-	m_quadMesh.Initialise(5, verticies, 18, indicies);
+	m_pyMesh.Initialise(5, verticies, 18, indicies);
 }
 
 void GraphicsApp::CreateHex()
@@ -430,10 +436,17 @@ void GraphicsApp::CreateHex()
 								 3,2,0,
 								 2,1,0};
 
-	m_quadMesh.Initialise(6, verticies, 18, indicies);
+	m_hexMesh.Initialise(6, verticies, 18, indicies);
 }
 
 void GraphicsApp::CreateGrid()
 {
+	for (int row = 0; row < 5; row++)
+	{
+		for (int col = 0; col < 5; col++)
+		{
+			
+		}
+	}
 
 }

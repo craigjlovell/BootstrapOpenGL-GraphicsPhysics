@@ -13,7 +13,7 @@ uniform vec3 CameraPosition;
 uniform vec3 Ka; // Ambient mat color
 uniform vec3 Kd; // Diffuse mat color
 uniform vec3 Ks; // Specular mat color
-float specularPower; // specular Power of mat
+uniform float specularPower; // specular Power of mat
 
 uniform vec3 AmbientColor; // Ambient light color
 uniform vec3 LightColor; // Diffuse and specular color
@@ -84,6 +84,9 @@ void main()
         diffuseTotal += Diffuse(direction, color, N);
         specularTotal += Specular(direction, color, N, V);
     }
+
+    // calculate specular term 
+ //float specularTerm = pow( max( 0, dot( R, V ) ), specularPower );
 
     // Calculate the diffuse, ambiet and specular color of the model
     vec3 ambient  = AmbientColor * Ka * texDiffuse;

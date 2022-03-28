@@ -106,5 +106,29 @@
     <None Include="..\bin\shaders\simple.vert">
       <Filter>Shader</Filter>
     </None>
+    <None Include="..\bin\shaders\normalMap.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\normalMap.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\phong.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\phong.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\post.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\post.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\textured.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\textured.vert">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.h"
+#include <vector>
 #include <glm/mat4x4.hpp>
 
 #include "Shader.h"
@@ -27,6 +28,8 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
+	glm::mat4 Rotation(glm::vec3 matrix, char axis, float rotationAmount);
+
 	glm::mat4 Rotation(glm::mat4 matrix, char axis, float rotationAmount);
 
 	void DrawPlanets();
@@ -51,6 +54,8 @@ protected:
 	aie::ShaderProgram	m_phongShader;
 	aie::ShaderProgram	m_texturedShader;
 	aie::ShaderProgram	m_normalMapShader;
+	aie::ShaderProgram	m_postShader;
+	aie::ShaderProgram	m_advancePostShader;
 
 	aie::RenderTarget	m_renderTarget;
 
@@ -58,11 +63,30 @@ protected:
 	FlyCamera			m_flyCamera;
 	StationaryCamera	m_stationaryCamera;
 
+	// For Post-Processing
+	Mesh				m_screenQuad;
+	int					m_postProcessEffect = 3;
 	glm::mat4			m_modelTransform;
 
 	// Generic quad data
 	Mesh				m_quadMesh;
 	glm::mat4			m_quadTransform;
+
+	// Generic Cube data
+	Mesh				m_cubeMesh;
+	glm::mat4			m_cubeTransform;
+
+	// Generic Pyra data
+	Mesh				m_pyMesh;
+	glm::mat4			m_pyTransform;
+
+	// Generic hex data
+	Mesh				m_hexMesh;
+	glm::mat4			m_hexTransform;
+
+	// Generic grid data
+	Mesh				m_gridMesh;
+	glm::mat4			m_gridTransform;
 
 	// Standford Bunny Data
 	aie::OBJMesh		m_bunnyMesh;
