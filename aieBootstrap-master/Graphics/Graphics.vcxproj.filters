@@ -57,6 +57,9 @@
     <ClCompile Include="RenderTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GraphicsApp.h">
@@ -98,6 +101,9 @@
     <ClInclude Include="RenderTarget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleEmitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\simple.frag">
@@ -128,6 +134,12 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="..\bin\shaders\textured.vert">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\advancePost.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\advancePost.vert">
       <Filter>Shader</Filter>
     </None>
   </ItemGroup>

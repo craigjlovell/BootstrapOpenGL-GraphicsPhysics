@@ -297,9 +297,9 @@ bool GraphicsApp::LaunchSahders()
 
 	Mesh::Vertex verticies[4];
 	verticies[0].position = { -0.5 ,0 ,  0.5 ,1 };
-	verticies[1].position = { 0.5 ,0 ,  0.5 ,1 };
+	verticies[1].position = {  0.5 ,0 ,  0.5 ,1 };
 	verticies[2].position = { -0.5 ,0 , -0.5 ,1 };
-	verticies[3].position = { 0.5 ,0 , -0.5 ,1 };
+	verticies[3].position = {  0.5 ,0 , -0.5 ,1 };
 
 	unsigned int indicies[6] = { 0, 1, 2, 2, 1, 3 };
 
@@ -341,15 +341,15 @@ bool GraphicsApp::LaunchSahders()
 	#pragma endregion
 
 	#pragma region Pokemon / Transform
-	if (m_pokemonMesh.load("./ball/pokeball.obj", true, true) == false)
+	if (m_pokemonMesh.load("./raygun/Raygun_low.obj", true, true) == false)
 	{
 		printf("Pokemon Mesh Error!\n");
 		return false;
 	}
 	m_pokemonTransform = {
-		0.05f  ,0  ,0  ,0,
-		0  ,0.05f  ,0  ,0,
-		0  ,0  ,0.05f  ,0,
+		0.5f  ,0  ,0  ,0,
+		0  ,0.5f  ,0  ,0,
+		0  ,0  ,0.5f  ,0,
 		0 ,0 ,0 ,1 };
 	
 	#pragma endregion
@@ -394,8 +394,10 @@ void GraphicsApp::CreateBox()
 	m_cubeMesh.Initialise(8, verticies, 36, indicies);
 
 	m_cubeTransform = {
-
-	};
+		1  ,0  ,0  ,0,
+		0  ,1  ,0  ,0,
+		0  ,0  ,1  ,0,
+		0  ,0  ,0  ,1 };
 }
 
 void GraphicsApp::CreatePyramid()
@@ -416,6 +418,11 @@ void GraphicsApp::CreatePyramid()
 								 1,4,0};
 
 	m_pyMesh.Initialise(5, verticies, 18, indicies);
+	m_pyTransform = {
+		1  ,0  ,0  ,0,
+		0  ,1  ,0  ,0,
+		0  ,0  ,1  ,0,
+		0  ,0  ,0  ,1 };
 }
 
 void GraphicsApp::CreateHex()
@@ -437,6 +444,11 @@ void GraphicsApp::CreateHex()
 								 2,1,0};
 
 	m_hexMesh.Initialise(6, verticies, 18, indicies);
+	m_hexTransform = {
+		1  ,0  ,0  ,0,
+		0  ,1  ,0  ,0,
+		0  ,0  ,1  ,0,
+		0  ,0  ,0  ,1 };
 }
 
 void GraphicsApp::CreateGrid()

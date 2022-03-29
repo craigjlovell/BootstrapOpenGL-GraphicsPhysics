@@ -82,6 +82,28 @@ vec4 Sepia(vec2 texCoord){
     return sepia;
 }
 
+vec4 GreyScale(vec2 texCoord){
+    vec4 baseColor = texture(colorTarget, texCoord);
+    vec4 grey = vec4(
+        dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f)),
+        dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f)),
+        dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f)),
+        1.0f
+    );
+    return grey;
+}
+
+vec4 Invert(vec2 texCoord){
+    vec4 baseColor = texture(colorTarget, texCoord);
+    vec4 invert = vec4(
+        1.0f - baseColor.r,
+        1.0f - baseColor.g,
+        1.0f - baseColor.b,
+        1.0f
+    );
+    return invert;
+}
+
 void main()
 {
     // First calculate the texel's size
@@ -128,12 +150,12 @@ void main()
         }
         case 6: // Grey Scale
         {
-            FragColor = Default(texCoord);
+            FragColor = GreyScale(texCoord);
             break;  
         }
         case 7: // Invert
         {
-            FragColor = Default(texCoord);
+            FragColor = Invert(texCoord);
             break;  
         }
         case 8: // Pixilizer

@@ -15,6 +15,21 @@
 
 class Scene;
 class Instance;
+enum PostProcessingEffect
+{
+	DEFAULT = 0,
+	BOX_BLUR,
+	DISTORT,
+	EDGE_DETECTION,
+	SEPIA,
+	SCAN_LINES,
+	GREY_SCALE,
+	INVERT,
+	PIXILIZER,
+	POSTERIZATION,
+	DISTANCE_FOG,
+	DEPTH_OF_VIEW
+};
 
 class GraphicsApp : public aie::Application {
 public:
@@ -28,11 +43,7 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
-	glm::mat4 Rotation(glm::vec3 matrix, char axis, float rotationAmount);
-
 	glm::mat4 Rotation(glm::mat4 matrix, char axis, float rotationAmount);
-
-	void DrawPlanets();
 
 protected:
 
@@ -65,7 +76,7 @@ protected:
 
 	// For Post-Processing
 	Mesh				m_screenQuad;
-	int					m_postProcessEffect = 3;
+	int					m_postProcessEffect = PostProcessingEffect::INVERT;
 	glm::mat4			m_modelTransform;
 
 	// Generic quad data
