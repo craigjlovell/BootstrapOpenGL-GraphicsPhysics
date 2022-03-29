@@ -33,7 +33,7 @@ public:
 		const glm::vec4& a_startColor, const glm::vec4& a_endColor);
 
 	void Emit();
-	void Update(float a_deltaTime);
+	void Update(float a_deltaTime, const glm::mat4& a_cameraTransform);
 	void Draw();
 
 	glm::vec3 GetPosition() { return m_position; }

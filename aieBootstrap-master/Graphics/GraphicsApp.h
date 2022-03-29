@@ -11,10 +11,14 @@
 #include "Camera.h"
 #include "FlyCamera.h"
 #include "StationaryCamera.h"
+
 #include "RenderTarget.h"
+#include "ParticleEmitter.h"
 
 class Scene;
 class Instance;
+class Camera;
+
 enum PostProcessingEffect
 {
 	DEFAULT = 0,
@@ -57,6 +61,8 @@ protected:
 
 	void CreateGrid();
 	
+	Instance*			m_raygunIns;
+
 	aie::Texture		m_gridTexture;
 	aie::Texture		m_spearTexture;
 	aie::Texture		m_pokemon;
@@ -70,13 +76,13 @@ protected:
 
 	aie::RenderTarget	m_renderTarget;
 
-	Camera				m_camera;
+	Camera*				m_camera;
 	FlyCamera			m_flyCamera;
 	StationaryCamera	m_stationaryCamera;
 
 	// For Post-Processing
 	Mesh				m_screenQuad;
-	int					m_postProcessEffect = PostProcessingEffect::INVERT;
+	int					m_postProcessEffect = PostProcessingEffect::DEFAULT;
 	glm::mat4			m_modelTransform;
 
 	// Generic quad data
@@ -108,8 +114,8 @@ protected:
 	glm::mat4			m_spearTransform;
 
 	// RayGun
-	aie::OBJMesh		m_pokemonMesh;
-	glm::mat4			m_pokemonTransform;
+	aie::OBJMesh		m_raygunMesh;
+	glm::mat4			m_raygunTransform;
 
 	// camera transforms
 	glm::mat4			m_viewMatrix;
@@ -120,5 +126,11 @@ protected:
 
 	Scene*				m_scene;
 
-	Instance*			m_pokemonIns;
+	ParticleEmitter*	m_emitter;
+	aie::ShaderProgram	m_particleShader;
+	glm::mat4			m_particleTransform;
+
+	void InitialiseOurParticles();
+	void DrawParticles(glm::mat4 a_pvm);
+	
 };

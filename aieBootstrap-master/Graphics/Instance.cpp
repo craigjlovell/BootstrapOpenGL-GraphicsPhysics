@@ -68,3 +68,13 @@ void Instance::SetRotation(float a_eulerAngles)
 {
 	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles), glm::vec3(0, 1, 0)));
 }
+
+void Instance::SetSize(float a_size)
+{
+	SetTransform(glm::scale(GetTransform(), a_size));
+}
+
+void Instance::SetScale(glm::mat4 a_scale)
+{
+	
+}

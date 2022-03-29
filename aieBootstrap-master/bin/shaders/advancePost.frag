@@ -5,7 +5,6 @@ in vec2 vTexCoord;
 
 uniform sampler2D colorTarget;
 uniform int postProcessTarget;
-uniform sampler2D screenTexture;
 
 out vec4 FragColor;
 
@@ -104,6 +103,19 @@ vec4 Invert(vec2 texCoord){
     return invert;
 }
 
+vec4 Posterization(vec2 texCoord){
+    float levels = 10;
+    vec4 baseColor = texture(colorTarget, texCoord);
+    float greyscale = max(baseColor.r, max(baseColor.g, baseColor.b));
+    float lower = floor(greyscale * levels) / levels;
+    float lowerDiff = abs(greyscale - lower);
+    float upper = ceil(greyscale * levels) / levels;
+    float upperDiff = abs(upper - greyscale);
+    float level = lowerDiff <= upperDiff ? lower : upper;
+    float adjustment = level / greyscale;
+    return vec4(baseColor.rgb * adjustment, 1.0f);
+}
+
 void main()
 {
     // First calculate the texel's size
@@ -158,14 +170,14 @@ void main()
             FragColor = Invert(texCoord);
             break;  
         }
-        case 8: // Pixilizer
+        case 8: // Pixilizer easy
         {
             FragColor = Default(texCoord);
             break;  
         }
-        case 9: // Posterization
+        case 9: // Posterization easy
         {
-            FragColor = Default(texCoord);
+            FragColor = Posterization(texCoord);
             break;  
         }
         case 10: // Distance fog

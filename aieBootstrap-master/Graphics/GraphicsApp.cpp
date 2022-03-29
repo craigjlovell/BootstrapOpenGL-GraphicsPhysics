@@ -38,13 +38,15 @@ bool GraphicsApp::startup()
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
+	m_camera = new Camera();
+
 	// Default Light Values
 	Light light;
 	light.direction = { 1, -1, 1 };
 	light.color = { 1, 1, 1 };
 	m_ambientLight = { 1.0f, 1.0f, 1.0f };
 
-	m_scene = new Scene(&m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+	m_scene = new Scene(m_camera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 25);
@@ -52,6 +54,7 @@ bool GraphicsApp::startup()
 
 	//m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
 
+	InitialiseOurParticles();
 	return LaunchSahders();
 }
 
@@ -93,16 +96,22 @@ void GraphicsApp::update(float deltaTime)
 	ImGui::End();
 
 	ImGui::Begin("Object Local Transform");
-	ImGui::DragFloat3("Position", (float *) (&m_pokemonIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
-	float change = 0;
-	ImGui::DragFloat("Rotation", &change, 0.1f, -20.0f, 20.0f);
-	m_pokemonIns->SetRotation(change);
-	//ImGui::DragFloat3("Position", (float *) (& m_pokemonIns->()[3]), 0.1f, -1.0f, 20.0f);
+	ImGui::DragFloat3("Position", (float *) (&m_raygunIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
+	float rot = 0;
+	ImGui::DragFloat3("Rotation", &rot, 0.1f, -20.0f, 20.0f);
+	m_raygunIns->SetRotation(rot);
+	float scale = 0;
+	ImGui::DragFloat("scale", &scale, 0.1f, -1.0f, 20.0f);
+	m_raygunIns->SetSize(scale);
 	ImGui::End();
 
-	m_camera.update(deltaTime);
+
+	// Run Camera Update
+	m_camera->update(deltaTime);
 	m_flyCamera.SetSpeed();
 	m_flyCamera.update(deltaTime);
+
+	m_emitter->Update(deltaTime, m_camera->GetTransform(m_camera->GetPosition(), glm::vec3(0), glm::vec3(1)));
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -111,9 +120,9 @@ void GraphicsApp::update(float deltaTime)
 		quit();
 	
 	if (input->isKeyDown(aie::INPUT_KEY_RIGHT))
-		glm::rotate(m_pokemonTransform, -0.8f, glm::vec3(0, 1, 0));
+		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', -0.8f);
 	if (input->isKeyDown(aie::INPUT_KEY_LEFT))
-		glm::rotate(m_pokemonTransform, 0.8f, glm::vec3( 0, 1, 0));
+		m_bunnyTransform = Rotation(m_bunnyTransform, 'y', 0.8f);
 }
 
 void GraphicsApp::draw() 
@@ -126,18 +135,21 @@ void GraphicsApp::draw()
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_flyCamera.GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_flyCamera.GetViewMatrix();
+	glm::mat4 projectionMatrix = m_camera->GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_camera->GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
+
+	//pvm = projectionMatrix * viewMatrix * m_particleTransform;
+	DrawParticles(pvm);
+	
 
 	//m_shader.bind();
 	//m_modelTransform = m_quadTransform;
 	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
 	//m_shader.bindUniform("ProjectionViewModel", pvm);
 	//m_quadMesh.draw();
-
 
 	#pragma region Textured Quad Mesh
 	// Bind the shader
@@ -219,12 +231,15 @@ glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmoun
 
 bool GraphicsApp::LaunchSahders()
 {
+#pragma region LaunchShaders
+
+	#pragma region RenderTarget
 	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false)
 	{
 		printf("Render Target Error!\n");
 		return false;
 	}
-#pragma region LaunchShaders
+	#pragma endregion
 
 	#pragma region Shader
 	m_shader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
@@ -292,6 +307,16 @@ bool GraphicsApp::LaunchSahders()
 	}
 	#pragma endregion
 
+	#pragma region Particle Shader
+	m_particleShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/particle.vert");
+	m_particleShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/particle.frag");
+	if (m_particleShader.link() == false)
+	{
+		printf("Particle Shader Error: %s\n", m_particleShader.getLastError());
+		return false;
+	}
+	#pragma endregion
+
 	// CREATE THE FULLSCREEN QUAD FOR POST PROCESSING EFFECTS
 	m_screenQuad.InitialiseFullScreenQuad();
 
@@ -340,13 +365,13 @@ bool GraphicsApp::LaunchSahders()
 		0  ,0  ,0  ,1 };
 	#pragma endregion
 
-	#pragma region Pokemon / Transform
-	if (m_pokemonMesh.load("./raygun/Raygun_low.obj", true, true) == false)
+	#pragma region Raygun / Transform
+	if (m_raygunMesh.load("./raygun/Raygun_low.obj", true, true) == false)
 	{
-		printf("Pokemon Mesh Error!\n");
+		printf("Raygun Mesh Error!\n");
 		return false;
 	}
-	m_pokemonTransform = {
+	m_raygunTransform = {
 		0.5f  ,0  ,0  ,0,
 		0  ,0.5f  ,0  ,0,
 		0  ,0  ,0.5f  ,0,
@@ -356,16 +381,14 @@ bool GraphicsApp::LaunchSahders()
 
 	for (int i = 0; i < 10; i++)
 		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
-
-	//m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
-	m_pokemonIns = new Instance(m_pokemonTransform, &m_pokemonMesh, &m_normalMapShader);
-	m_scene->AddInstance(m_pokemonIns);
-
+	m_raygunIns = new Instance(m_raygunTransform, &m_raygunMesh, &m_normalMapShader);
+	m_scene->AddInstance(m_raygunIns);
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
 	
 	//CreateHex();
 	//CreateBox();
 	return true;
+
 #pragma endregion
 }
 
@@ -461,4 +484,21 @@ void GraphicsApp::CreateGrid()
 		}
 	}
 
+}
+
+void GraphicsApp::InitialiseOurParticles()
+{
+	m_emitter = new ParticleEmitter();
+	m_emitter->Inirialise(1000, 500,
+		0.1f, 1.f, 1.f,
+		5.f, 1.f, 0.1f, 
+		glm::vec4(0, 1, 1, 1),
+		glm::vec4(1, 1, 0, 1));
+}
+
+void GraphicsApp::DrawParticles(glm::mat4 a_pvm)
+{
+	m_particleShader.bind();
+	m_particleShader.bindUniform("ProjectionViewModel", a_pvm);
+	m_emitter->Draw();
 }

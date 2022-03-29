@@ -9,7 +9,7 @@ ParticleEmitter::ParticleEmitter() : m_particles(nullptr), m_firstDead(0), m_max
 ParticleEmitter::~ParticleEmitter()
 {
 	delete[] m_particles;
-	delete[]m_vertexData;
+	delete[] m_vertexData;
 
 	glDeleteVertexArrays(1, &m_vao);
 	glDeleteBuffers(1, &m_vbo);
@@ -48,10 +48,11 @@ void ParticleEmitter::Inirialise(unsigned int a_maxParticles, unsigned int a_emi
 	unsigned int* indexData = new unsigned int[m_maxParticles * 6];
 	for (unsigned int i = 0; i < m_maxParticles; i++)
 	{
-		indexData[i * 6] = i * 4;
+		indexData[i * 6 + 0] = i * 4 + 0;
 		indexData[i * 6 + 1] = i * 4 + 1;
 		indexData[i * 6 + 2] = i * 4 + 2;
-		indexData[i * 6 + 3] = i * 4;
+
+		indexData[i * 6 + 3] = i * 4 + 0;
 		indexData[i * 6 + 4] = i * 4 + 2;
 		indexData[i * 6 + 5] = i * 4 + 3;
 	}
@@ -66,8 +67,8 @@ void ParticleEmitter::Inirialise(unsigned int a_maxParticles, unsigned int a_emi
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
 	glBufferData(GL_ARRAY_BUFFER, m_maxParticles * 4 * sizeof(ParticleVertex), m_vertexData, GL_DYNAMIC_DRAW);
 
-	glBindBuffer(GL_QUERY_BUFFER, m_ibo);
-	glBufferData(GL_QUERY_BUFFER, m_maxParticles * 6 * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxParticles * 6 * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0); // This os the position
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), 0);
@@ -121,7 +122,7 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 	// It will then emit the particles based on thge emitters provided rate.
 	// Finally we will update the vertex array and construct the billboarding
 
-	m_emitTimer = +a_deltaTime;
+	m_emitTimer += a_deltaTime;
 
 	// Spawn particles
 	while (m_emitTimer > m_emitRate)
@@ -136,8 +137,8 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 	for (unsigned int i = 0; i < m_firstDead; i++)
 	{
 		Particle* particle = &m_particles[i];
-
 		particle->lifetime += a_deltaTime;
+
 		if (particle->lifetime >= particle->lifespan)
 		{ // If true, replace the last alive particle with this one 
 			*particle = m_particles[m_firstDead - 1];
@@ -150,11 +151,56 @@ void ParticleEmitter::Update(float a_deltaTime, const glm::mat4& a_cameraTransfo
 			particle->position += particle->velocity * a_deltaTime;
 
 			// Next scale the particle
+			particle->size = glm::mix(m_startSize, m_endSize, particle->lifetime / particle->lifespan);
 
+			// Then we can color the particle
+			particle->color = glm::mix(m_startColor, m_endColor, particle->lifetime / particle->lifespan);
+
+			// Finally we will set up our quad using the correct psoition, color and scale
+			float halfSize = particle->size * 0.5f;
+
+			m_vertexData[quad * 4 + 0].position = glm::vec4( halfSize,  halfSize, 0, 1);
+			m_vertexData[quad * 4 + 0].color = particle->color;
+
+			m_vertexData[quad * 4 + 1].position = glm::vec4(-halfSize,  halfSize, 0, 1);
+			m_vertexData[quad * 4 + 1].color = particle->color;
+
+			m_vertexData[quad * 4 + 2].position = glm::vec4(-halfSize, -halfSize, 0, 1);
+			m_vertexData[quad * 4 + 2].color = particle->color;
+
+			m_vertexData[quad * 4 + 3].position = glm::vec4( halfSize, -halfSize, 0, 1);
+			m_vertexData[quad * 4 + 3].color = particle->color;
+
+			// Set up our billboard's transform
+			glm::vec3 zAxis = glm::normalize(glm::vec3(a_cameraTransform[3]) - particle->position);
+			glm::vec3 xAxis = glm::cross(glm::vec3(a_cameraTransform[1]), zAxis);
+			glm::vec3 yAxis = glm::cross(zAxis, xAxis);
+
+			glm::mat4 billboard(glm::vec4(xAxis, 0), glm::vec4(yAxis, 0),
+								glm::vec4(zAxis, 0), glm::vec4(0, 0, 0, 1));
+
+			m_vertexData[quad * 4 + 0].position = billboard * 
+				m_vertexData[quad * 4].position + glm::vec4(particle->position, 0);
+
+			m_vertexData[quad * 4 + 1].position = billboard *
+				m_vertexData[quad * 4 + 1].position + glm::vec4(particle->position, 0);
+
+			m_vertexData[quad * 4 + 2].position = billboard *
+				m_vertexData[quad * 4 + 2].position + glm::vec4(particle->position, 0);
+
+			m_vertexData[quad * 4 + 3].position = billboard *
+				m_vertexData[quad * 4 + 3].position + glm::vec4(particle->position, 0);
+
+			++quad;
 		}
 	}
 }
 
 void ParticleEmitter::Draw()
 {
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, m_firstDead * 4 * sizeof(ParticleVertex), m_vertexData);
+
+	glBindVertexArray(m_vao);
+	glDrawElements(GL_TRIANGLES, m_firstDead * 6, GL_UNSIGNED_INT, 0);
 }
