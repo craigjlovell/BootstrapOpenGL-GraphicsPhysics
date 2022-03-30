@@ -81,9 +81,10 @@ void AIE_PhysicsApp::update(float deltaTime)
 	//	m_rocket->SetMass(m_rocket->GetMass() - 1.f);
 	//	UpdateRocket();
 	//	timer = 0;
-	//}	
-
-	HitCueBall(input);
+	//}
+		
+	//MouseInputTest(input);
+	HitCueBall2(input);
 }
 
 void AIE_PhysicsApp::draw() 
@@ -202,6 +203,43 @@ void AIE_PhysicsApp::HitCueBall(aie::Input* a_input)
 			m_white->ApplyForce(m_cforce, glm::vec2(0, 0));
 		}
 	}
+}
+
+void AIE_PhysicsApp::HitCueBall2(aie::Input* a_input)
+{
+    int screenX, screenY;
+    glm::vec2 forceVector;
+    if (a_input->isMouseButtonDown(0))
+    {
+        if (m_ballsStatic)
+        {
+            a_input->getMouseXY(&screenX, &screenY);
+            glm::vec2 worldPos = ScreenToWorld(glm::vec2(screenX, screenY));
+            if (m_forcestart == glm::vec2(0, 0))
+				m_forcestart = worldPos;
+            glm::vec2 cuePos = m_white->GetPosition();
+            forceVector = glm::vec2(m_forcestart - worldPos);
+            float forceVectorLength = glm::length(forceVector);
+            forceVectorLength = glm::clamp(forceVectorLength, 0.f, 20.f);
+            float angle = atan2f(forceVector.y, forceVector.x);
+            glm::vec2 end = glm::vec2(std::cos(angle), std::sin(angle)) * forceVectorLength;
+            aie::Gizmos::add2DLine(worldPos, m_white->GetPosition(), glm::vec4(1, 0.5f, 0, 1)); // on release set cue velocity to forcevector
+            float clampForce = 40.f;
+            forceVector.x = glm::clamp(forceVector.x, -clampForce, clampForce);
+            forceVector.y = glm::clamp(forceVector.y, -clampForce, clampForce);
+			m_cforce = forceVector * 20.f;
+        }
+    }
+    if (a_input->wasMouseButtonReleased(0))
+    {
+        if (m_ballsStatic)
+        {
+			m_moving = true;
+			m_forcestart = glm::vec2(0, 0);
+			m_white->ApplyForce(m_cforce, glm::vec2(0, 0));
+			m_ballSunk = false;
+        }
+    }
 }
 
 void AIE_PhysicsApp::Pool()
@@ -520,28 +558,34 @@ Circle* AIE_PhysicsApp::CreateHole(glm::vec2 a_pos, glm::vec2 a_vel, float a_mas
 
 	circle->ApplyForce(a_force, circle->GetPosition());
 
-	circle->triggerExit = [=](PhysicsObject* a_other)
+	circle->triggerEnter = [=](PhysicsObject* a_other)
 	{
 		Ball* ball = dynamic_cast<Ball*>(a_other);
 		if (ball != nullptr)
 		{
 			if (ball->GetBallID() == STRIPE)
 			{
+				ball->SetVelocity(glm::vec2(0, 0));
 				m_stripe.remove(a_other);
-				m_physicsScene->RemoveActor(a_other);
+				//m_physicsScene->RemoveActor(a_other);
 			}
-			if (ball->GetBallID() == SOLID)
+			else if (ball->GetBallID() == SOLID)
 			{
 				m_solid.remove(a_other);
-				m_physicsScene->RemoveActor(a_other);
+				//m_physicsScene->RemoveActor(a_other);
 			}
-			if (ball->GetBallID() == WHITEBALL)
-			{
-				m_white->SetPosition(glm::vec2(-40, 0));
-				m_white->SetVelocity(glm::vec2(0, 0));
-			}
+			//if (ball->GetBallID() == WHITEBALL)
+			//{
+			//	m_white->SetPosition(glm::vec2(-40, 0));
+			//	m_white->SetVelocity(glm::vec2(0, 0));
+			//}
 		}
 		ball = nullptr;
+	};
+
+	circle->triggerExit = [=](PhysicsObject* a_other)
+	{
+
 	};
 
 	return circle;

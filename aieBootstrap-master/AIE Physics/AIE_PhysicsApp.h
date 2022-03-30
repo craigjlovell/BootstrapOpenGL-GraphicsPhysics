@@ -48,6 +48,13 @@ protected:
 	std::list<PhysicsObject*>m_stripe;
 	std::list<PhysicsObject*>m_solid;
 
+	bool m_moving = false;
+	bool m_movingLastFrame = false;
+	bool m_firstBallSunk = false;
+	bool m_ballSunk = false;
+	bool m_playersTurn = false;
+
+
 	glm::vec4 c_colour;
 	glm::vec4 c_yellow = glm::vec4(1, 1, 0, 1);
 	glm::vec4 c_red = glm::vec4(1, 0, 0, 1);
@@ -79,6 +86,8 @@ public:
 	Player* CreatePlayer(glm::vec2 a_position, glm::vec2 a_velocity, float a_rotation, float a_mass, float a_width, float a_height, glm::vec4 a_colour);
 
 	void HitCueBall(aie::Input* a_input);
+
+	void HitCueBall2(aie::Input* a_input);
 
 	void CreateBeacor();
 	void RotstionTest();
