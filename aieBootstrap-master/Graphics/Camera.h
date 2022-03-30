@@ -11,9 +11,12 @@ public:
 	virtual void update(float deltaTime = 0);
 
 	void SetPosition(glm::vec3 a_position);
-	glm::vec3 GetPosition();
+	glm::vec3 GetPosition();// couldnt i just return m_pos 
+							//and ignore the function and set
+							// it in set then set m to = a
 
-	void SetRotation(glm::vec3 a_rotation);
+
+	void SetRotation(glm::vec3 a_rotation);//, float angle);
 	glm::vec3 GetRotation();
 
 	void SetScale(glm::vec3 a_scale);
@@ -31,6 +34,7 @@ public:
 
 	glm::mat4 GetTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale);
 
+	//glm::mat4 MakeTransform() { return m_transform; };
 	glm::mat4 MakeTransform();
 
 protected:
@@ -63,4 +67,3 @@ protected:
 			0,	0,	0,	1	// 3
 	};//	x	y	z	w
 };
-

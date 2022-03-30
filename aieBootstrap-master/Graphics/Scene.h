@@ -4,6 +4,7 @@
 #include <vector>
 
 class Camera;
+class FlyCamera;
 class Instance;
 
 const int MAX_LIGHTS = 4;
@@ -11,9 +12,9 @@ const int MAX_LIGHTS = 4;
 struct Light
 {
 	Light() {}
-	Light(glm::vec3 pos, glm::vec3 col, float intensity)
+	Light(glm::vec3 dir, glm::vec3 col, float intensity)
 	{
-		direction = pos;
+		direction = dir;
 		color = col * intensity;
 	}
 
@@ -31,12 +32,13 @@ public:
 	void AddInstance(Instance* a_instance);
 	void Draw();
 
-	Camera*				GetCamera()				{ return m_camera; }
-	glm::vec2			GetWindowSize()			{ return m_windowSize; }
-	Light&				GetGlobalLight()		{ return m_globalDirLight; }
-	glm::vec3			GetAmibentLight()		{ return m_ambientLight; }
-	std::vector<Light>& GetPointLights()		{ return m_pointLights; }
-	int					GetNumLights()			{ return (int)m_pointLights.size(); }
+	Camera*					GetCamera()				{ return m_camera; }
+	glm::vec2				GetWindowSize()			{ return m_windowSize; }
+	Light&					GetGlobalLight()		{ return m_globalDirLight; }
+	glm::vec3				GetAmibentLight()		{ return m_ambientLight; }
+	std::vector<Light>&		GetPointLights()		{ return m_pointLights; }
+	int						GetNumLights()			{ return (int)m_pointLights.size(); }
+	std::list<Instance*>	GetInstances()			{ return m_instances; }
 
 	glm::vec3*		GetPointLightPositions()	{ return &m_pointLightPositions[0]; }
 	glm::vec3*		GetPointLightColors()		{ return &m_pointLightColors[0]; }

@@ -26,7 +26,7 @@ public:
 	ParticleEmitter();
 	virtual ~ParticleEmitter();
 
-	void Inirialise(unsigned int a_maxParticles, unsigned int a_emitRate, 
+	void Initialise(unsigned int a_maxParticles, unsigned int a_emitRate, 
 		float a_lifetimeMin, float a_lifetimeMax,
 		float a_velocityMin, float a_velocityMax, 
 		float a_startSize, float a_endSize, 

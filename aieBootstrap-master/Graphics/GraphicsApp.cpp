@@ -27,7 +27,7 @@ GraphicsApp::~GraphicsApp()
 
 }
 
-bool GraphicsApp::startup() 
+bool GraphicsApp::startup()
 {
 	setBackgroundColour(0.25f, 0.25f, 0.25f);
 
@@ -39,22 +39,36 @@ bool GraphicsApp::startup()
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
 	m_camera = new Camera();
+	m_flyCamera = new FlyCamera();
 
 	// Default Light Values
 	Light light;
 	light.direction = { 1, -1, 1 };
 	light.color = { 1, 1, 1 };
-	m_ambientLight = { 1.0f, 1.0f, 1.0f };
+	m_ambientLight = { 0.5f, 0.5f, 0.5f };
 
-	m_scene = new Scene(m_camera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+	m_emitter = new ParticleEmitter();
+	m_emitter->Initialise(
+		1000, 500,
+		0.1f, 1.0f,
+		1.0f, 5.0f,
+		1.0f, 0.1f,
+		glm::vec4(1, 0, 0, 1),
+		glm::vec4(1, 1, 0, 1));
 
+	t_position = { 0, 0, 0 };
+	t_rotation = { 0, 0, 0 };
+	t_scale	   = { 1, 1, 1 };
+
+	m_scene = new Scene(m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
+
+	//scale = { .5f ,.5f ,.5f };
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 25);
 	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
 
 	//m_stationaryCamera = StationaryCamera(glm::vec3{ -10,2,0 }, m_camera.GetRotation());
 
-	InitialiseOurParticles();
 	return LaunchSahders();
 }
 
@@ -95,23 +109,29 @@ void GraphicsApp::update(float deltaTime)
 	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
 
+	//ImGui::Begin("Object Local Transform");
+	//ImGui::DragFloat3("Position", (float *) (&m_raygunIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
+	//ImGui::End();
+
+	auto* obj = m_scene->GetInstances().back();
 	ImGui::Begin("Object Local Transform");
-	ImGui::DragFloat3("Position", (float *) (&m_raygunIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
-	float rot = 0;
-	ImGui::DragFloat3("Rotation", &rot, 0.1f, -20.0f, 20.0f);
-	m_raygunIns->SetRotation(rot);
-	float scale = 0;
-	ImGui::DragFloat("scale", &scale, 0.1f, -1.0f, 20.0f);
-	m_raygunIns->SetSize(scale);
+	ImGui::DragFloat3("Position", &t_position[0], 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat3("Rotation", &t_rotation[0], 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat3("scale", &t_scale[0], 0.1f, -1.0f, 20.0f);
+	ImGui::End();
+	obj->SetTransform(obj->MakeTransform(t_position, t_rotation, t_scale));
+
+	ImGui::Begin("Bunny Local Transform");
+	ImGui::DragFloat("Position", (float*) &m_bunnyTransform[3], 0.1f, -20.0f, 20.0f);
 	ImGui::End();
 
 
 	// Run Camera Update
 	m_camera->update(deltaTime);
-	m_flyCamera.SetSpeed();
-	m_flyCamera.update(deltaTime);
+	m_flyCamera->SetSpeed();
+	m_flyCamera->update(deltaTime);
 
-	m_emitter->Update(deltaTime, m_camera->GetTransform(m_camera->GetPosition(), glm::vec3(0), glm::vec3(1)));
+	m_emitter->Update(deltaTime, m_flyCamera->GetTransform(m_flyCamera->GetPosition(), glm::vec3(0), glm::vec3(1)));
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -135,16 +155,40 @@ void GraphicsApp::draw()
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_camera->GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_camera->GetViewMatrix();
+	glm::mat4 projectionMatrix = m_flyCamera->GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_flyCamera->GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
 
-	//pvm = projectionMatrix * viewMatrix * m_particleTransform;
-	DrawParticles(pvm);
-	
+#pragma region Bunny
+	m_phongExtShader.bind();
+	m_phongExtShader.bindUniform("LightDirection", m_scene->GetGlobalLight().direction);
+	m_phongExtShader.bindUniform("AmbientColor", m_scene->GetAmibentLight());
+	m_phongExtShader.bindUniform("LightColor", m_scene->GetGlobalLight().color);
+	m_phongExtShader.bindUniform("CameraPosition", m_flyCamera->GetPosition());
 
+	pvm = projectionMatrix * viewMatrix * m_bunnyTransform;
+	m_phongExtShader.bindUniform("ProjectionViewModel", pvm);
+	m_phongExtShader.bindUniform("ModelMatrix", m_bunnyTransform);
+
+	m_marbleTexture.bind(0);
+	m_phongExtShader.bindUniform("seamlessTexture", 0);
+
+	m_hatchingTexture.bind(1);
+	m_phongExtShader.bindUniform("hatchingTexture", 1);
+
+	m_rampTexture.bind(2);
+	m_phongExtShader.bindUniform("rampTexture", 2);
+
+	m_bunnyMesh.draw();
+#pragma endregion
+
+	m_particleShader.bind();
+	pvm = projectionMatrix * viewMatrix * m_particleTransform;
+	m_particleShader.bindUniform("ProjectionViewModel", pvm);
+	m_emitter->Draw();
+	
 	//m_shader.bind();
 	//m_modelTransform = m_quadTransform;
 	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
@@ -170,7 +214,6 @@ void GraphicsApp::draw()
 
 	// Draw quad
 	m_quadMesh.draw();
-
 	#pragma endregion
 
 	Gizmos::draw(projectionMatrix * viewMatrix);
@@ -186,7 +229,6 @@ void GraphicsApp::draw()
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_screenQuad.draw();
-
 }
 
 glm::mat4 GraphicsApp::Rotation(glm::mat4 matrix, char axis, float rotationAmount)
@@ -247,6 +289,16 @@ bool GraphicsApp::LaunchSahders()
 	if (m_shader.link() == false)
 	{
 		printf("Simple Shader Error: %s\n", m_shader.getLastError());
+		return false;
+	}
+	#pragma endregion
+
+	#pragma region PhongExtShader
+	m_phongExtShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phongExt.vert");
+	m_phongExtShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phongExt.frag");
+	if (m_phongExtShader.link() == false)
+	{
+		printf("PhongExt Shader Error: %s\n", m_phongExtShader.getLastError());
 		return false;
 	}
 	#pragma endregion
@@ -345,10 +397,10 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 	m_bunnyTransform = {
-		0.1f ,0    ,0    ,0 ,
-		0    ,0.1f ,0    ,0 ,
-		0    ,0    ,0.1f ,0 ,
-		0    ,0    ,0    ,1
+		 0.1f ,0    ,0    ,0 ,
+		 0    ,0.1f ,0    ,0 ,
+		 0    ,0    ,0.1f ,0 ,
+		-4    ,0    ,4    ,1
 	};
 	#pragma endregion
 
@@ -379,12 +431,23 @@ bool GraphicsApp::LaunchSahders()
 	
 	#pragma endregion
 
+	m_particleTransform = {
+		1  ,0  ,0  ,0,
+		0  ,1  ,0  ,0,
+		0  ,0  ,1  ,0,
+		0  ,0  ,0  ,1 };
+
+	m_marbleTexture.load("./textures/marble2.jpg");
+	m_hatchingTexture.load("./textures/Ramp02.png");
+	m_rampTexture.load("./textures/ramps.png", true);
+	
 	for (int i = 0; i < 10; i++)
 		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
 	m_raygunIns = new Instance(m_raygunTransform, &m_raygunMesh, &m_normalMapShader);
 	m_scene->AddInstance(m_raygunIns);
+
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
-	
+
 	//CreateHex();
 	//CreateBox();
 	return true;
@@ -488,17 +551,10 @@ void GraphicsApp::CreateGrid()
 
 void GraphicsApp::InitialiseOurParticles()
 {
-	m_emitter = new ParticleEmitter();
-	m_emitter->Inirialise(1000, 500,
-		0.1f, 1.f, 1.f,
-		5.f, 1.f, 0.1f, 
-		glm::vec4(0, 1, 1, 1),
-		glm::vec4(1, 1, 0, 1));
+	
 }
 
 void GraphicsApp::DrawParticles(glm::mat4 a_pvm)
 {
-	m_particleShader.bind();
-	m_particleShader.bindUniform("ProjectionViewModel", a_pvm);
-	m_emitter->Draw();
+	
 }

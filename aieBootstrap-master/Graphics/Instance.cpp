@@ -1,9 +1,9 @@
 #include "Instance.h"
 
-#include <glm/ext.hpp>
+#include "glm/ext.hpp"
 
 #include "Scene.h"
-#include <Texture.h>
+#include "Texture.h"
 #include "OBJMesh.h"
 #include "Camera.h"
 #include "GraphicsApp.h"
@@ -69,12 +69,7 @@ void Instance::SetRotation(float a_eulerAngles)
 	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles), glm::vec3(0, 1, 0)));
 }
 
-void Instance::SetSize(float a_size)
+void Instance::SetSize(glm::vec3 a_eulerAngles)
 {
-	SetTransform(glm::scale(GetTransform(), a_size));
-}
-
-void Instance::SetScale(glm::mat4 a_scale)
-{
-	
+	SetTransform(glm::scale(GetTransform(), a_eulerAngles));
 }

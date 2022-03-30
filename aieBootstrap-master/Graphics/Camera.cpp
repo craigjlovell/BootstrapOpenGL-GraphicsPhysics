@@ -22,26 +22,27 @@ void Camera::update(float deltaTime)
 
 void Camera::SetPosition(glm::vec3 a_position)
 {
-	m_local[0].w = a_position.x;
-	m_local[1].w = a_position.y;
-	m_local[2].w = a_position.z;
+	m_local[3].x = a_position.x;
+	m_local[3].y = a_position.y;
+	m_local[3].z = a_position.z;
 
 	m_position = a_position;
 }
 
 glm::vec3 Camera::GetPosition()
 {
-	glm::vec3 tempVec;
+	//glm::vec3 tempVec;
+	//
+	//tempVec.x = m_local[3].x;
+	//tempVec.y = m_local[3].y;
+	//tempVec.z = m_local[3].z;
 
-	tempVec.x = m_local[0].w;
-	tempVec.y = m_local[1].w;
-	tempVec.z = m_local[2].w;
-
-	return tempVec;
+	return m_position;
 }
 
-void Camera::SetRotation(glm::vec3 a_rotation)
+void Camera::SetRotation(glm::vec3 a_rotation)//, float angle)
 {
+	//m_transform = glm::rotate(MakeTransform(), glm::radians(angle), glm::vec3(0, 1, 0));
 	glm::mat4 tempMat;
 	
 	float cosX = cos(glm::radians(a_rotation.x));

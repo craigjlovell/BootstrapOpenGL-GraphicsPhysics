@@ -16,7 +16,7 @@ ParticleEmitter::~ParticleEmitter()
 	glDeleteBuffers(1, &m_ibo);
 }
 
-void ParticleEmitter::Inirialise(unsigned int a_maxParticles, unsigned int a_emitRate, float a_lifetimeMin, float a_lifetimeMax, float a_velocityMin, float a_velocityMax, float a_startSize, float a_endSize, const glm::vec4& a_startColor, const glm::vec4& a_endColor)
+void ParticleEmitter::Initialise(unsigned int a_maxParticles, unsigned int a_emitRate, float a_lifetimeMin, float a_lifetimeMax, float a_velocityMin, float a_velocityMax, float a_startSize, float a_endSize, const glm::vec4& a_startColor, const glm::vec4& a_endColor)
 {
 	// First we want to set up the emitters
 	m_emitTimer = 0;
@@ -69,7 +69,7 @@ void ParticleEmitter::Inirialise(unsigned int a_maxParticles, unsigned int a_emi
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_maxParticles * 6 * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
-
+	 
 	glEnableVertexAttribArray(0); // This os the position
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleVertex), 0);
 

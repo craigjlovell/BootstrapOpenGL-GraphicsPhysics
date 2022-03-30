@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
+#include "glm/ext.hpp"
 
 
 class Camera;
@@ -26,9 +27,9 @@ public:
 
 	void SetRotation(float a_eulerAngles);
 	
-	glm::mat4 GetScale() { return m_transform; }
-	void SetScale(glm::mat4 a_scale) { m_transform = a_scale; }
-	void SetSize(float a_size);
+	glm::vec3 GetScale() { return m_scale; }
+	void SetScale(glm::vec3 a_scale) { m_transform *= glm::scale(m_transform, a_scale); }
+	void SetSize(glm::vec3 a_eulerAngles);
 
 
 	glm::vec3 GetRotation() { return m_rotation; }

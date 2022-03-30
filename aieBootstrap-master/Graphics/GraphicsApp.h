@@ -49,7 +49,14 @@ public:
 
 	glm::mat4 Rotation(glm::mat4 matrix, char axis, float rotationAmount);
 
+	glm::vec3 scale;
+
 protected:
+
+	glm::vec3 t_rotation;
+	glm::vec3 t_scale;
+	glm::vec3 t_position;
+
 
 	bool LaunchSahders();
 
@@ -67,17 +74,23 @@ protected:
 	aie::Texture		m_spearTexture;
 	aie::Texture		m_pokemon;
 
+	aie::Texture		m_marbleTexture;
+	aie::Texture		m_hatchingTexture;
+	aie::Texture		m_rampTexture;
+
 	aie::ShaderProgram	m_shader;
 	aie::ShaderProgram	m_phongShader;
+	aie::ShaderProgram	m_phongExtShader;
 	aie::ShaderProgram	m_texturedShader;
 	aie::ShaderProgram	m_normalMapShader;
 	aie::ShaderProgram	m_postShader;
 	aie::ShaderProgram	m_advancePostShader;
+	aie::ShaderProgram	m_particleShader;
 
 	aie::RenderTarget	m_renderTarget;
 
 	Camera*				m_camera;
-	FlyCamera			m_flyCamera;
+	FlyCamera*			m_flyCamera;
 	StationaryCamera	m_stationaryCamera;
 
 	// For Post-Processing
@@ -127,7 +140,6 @@ protected:
 	Scene*				m_scene;
 
 	ParticleEmitter*	m_emitter;
-	aie::ShaderProgram	m_particleShader;
 	glm::mat4			m_particleTransform;
 
 	void InitialiseOurParticles();
