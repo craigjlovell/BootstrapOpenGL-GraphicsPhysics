@@ -64,12 +64,16 @@ glm::mat4 Instance::MakeTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles,
 		* glm::scale(glm::mat4(1), a_scale);
 }
 
-void Instance::SetRotation(float a_eulerAngles)
+void Instance::SetRotation(float a_eulerAngles, float a_eulerAngles1, float a_eulerAngles2)
 {
 	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles), glm::vec3(0, 1, 0)));
+	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles1), glm::vec3(1, 0, 0)));
+	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles2), glm::vec3(0, 0, 1)));
 }
 
-void Instance::SetSize(glm::vec3 a_eulerAngles)
+void Instance::SetSize(glm::vec3 a_eulerAngles, glm::vec3 a_eulerAngles1, glm::vec3 a_eulerAngles2)
 {
 	SetTransform(glm::scale(GetTransform(), a_eulerAngles));
+	SetTransform(glm::scale(GetTransform(), a_eulerAngles1));
+	SetTransform(glm::scale(GetTransform(), a_eulerAngles2));
 }

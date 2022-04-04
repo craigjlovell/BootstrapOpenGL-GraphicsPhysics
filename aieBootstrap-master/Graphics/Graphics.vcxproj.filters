@@ -148,5 +148,11 @@
     <None Include="..\bin\shaders\phongExt.vert">
       <Filter>Shader</Filter>
     </None>
+    <None Include="..\bin\shaders\particle.frag">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="..\bin\shaders\particle.vert">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

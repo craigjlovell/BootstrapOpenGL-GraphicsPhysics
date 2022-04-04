@@ -53,9 +53,14 @@ public:
 
 protected:
 
+	float m_dt = 0;
+
 	glm::vec3 t_rotation;
 	glm::vec3 t_scale;
 	glm::vec3 t_position;
+	glm::vec3 t_rotation2;
+	glm::vec3 t_scale2;
+	glm::vec3 t_position2;
 
 
 	bool LaunchSahders();
@@ -95,7 +100,7 @@ protected:
 
 	// For Post-Processing
 	Mesh				m_screenQuad;
-	int					m_postProcessEffect = PostProcessingEffect::DEFAULT;
+	int					m_postProcessEffect = PostProcessingEffect::DEPTH_OF_VIEW;
 	glm::mat4			m_modelTransform;
 
 	// Generic quad data
@@ -141,8 +146,5 @@ protected:
 
 	ParticleEmitter*	m_emitter;
 	glm::mat4			m_particleTransform;
-
-	void InitialiseOurParticles();
-	void DrawParticles(glm::mat4 a_pvm);
 	
 };

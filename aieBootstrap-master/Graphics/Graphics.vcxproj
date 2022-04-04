@@ -200,6 +200,8 @@
     <None Include="..\bin\shaders\advancePost.vert" />
     <None Include="..\bin\shaders\normalMap.frag" />
     <None Include="..\bin\shaders\normalMap.vert" />
+    <None Include="..\bin\shaders\particle.frag" />
+    <None Include="..\bin\shaders\particle.vert" />
     <None Include="..\bin\shaders\phong.frag" />
     <None Include="..\bin\shaders\phong.vert" />
     <None Include="..\bin\shaders\phongExt.frag" />

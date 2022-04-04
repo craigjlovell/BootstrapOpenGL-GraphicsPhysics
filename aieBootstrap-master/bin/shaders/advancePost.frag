@@ -4,9 +4,20 @@
 in vec2 vTexCoord;
 
 uniform sampler2D colorTarget;
+uniform vec2 screensize;
 uniform int postProcessTarget;
+uniform float deltaTime;
+
+uniform sampler2D outOfColorTarget;
+uniform sampler2D positionTexture;
+uniform vec2 mouseFocusPoint;
+
+uniform vec4 color;
+uniform vec2 nearFar;
+uniform sampler2D fogTexture;
 
 out vec4 FragColor;
+out vec4 FragColor1;
 
 //Return the out of the colors as the data was originally provided
 vec4 Default(vec2 texCoord){
@@ -81,13 +92,34 @@ vec4 Sepia(vec2 texCoord){
     return sepia;
 }
 
+vec4 ScanLines(vec2 texCoord){
+    float density = 1.3f;
+    float opacityScanline = 0.3;
+    float opacityNoise = 0.2;
+    float flickering = 0.03;
+
+    vec2 uv = texCoord / screensize.xy;
+    vec3 baseColor = texture(colorTarget, uv).rgb;
+
+    float count = screensize.y * density;
+    vec2 sl = vec2(sin(uv.y * count), cos(uv.y * count));
+    vec3 scanlines = vec3(sl.x, sl.y, sl.x);
+
+    float random = fract(sin(dot(uv * deltaTime, vec2(12.9898,78.233)))*43758.5453123);
+
+    baseColor += baseColor * scanlines * opacityScanline;
+    baseColor += baseColor * random * opacityNoise;
+    baseColor += baseColor * sin(110.0 * deltaTime) * flickering;
+    baseColor += texture(colorTarget, texCoord).rgb;
+    
+    return vec4(baseColor, 1.0f);
+}
+
 vec4 GreyScale(vec2 texCoord){
     vec4 baseColor = texture(colorTarget, texCoord);
+    float greyData = dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f));
     vec4 grey = vec4(
-        dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f)),
-        dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f)),
-        dot(baseColor.rgb, vec3(0.5f,0.5f,0.5f)),
-        1.0f
+        greyData, greyData, greyData, 1.0f        
     );
     return grey;
 }
@@ -103,6 +135,15 @@ vec4 Invert(vec2 texCoord){
     return invert;
 }
 
+vec4 Pixilizer (vec2 texCoord){
+    float pixels = 512;
+    float dx = 15 * (1.0 / pixels);
+    float dy = 10 * (1.0 / pixels);
+    vec2 coord = vec2(dx * floor(texCoord.x / dx),
+                      dy * floor(texCoord.y / dy));
+    return texture(colorTarget, coord);
+}
+
 vec4 Posterization(vec2 texCoord){
     float levels = 10;
     vec4 baseColor = texture(colorTarget, texCoord);
@@ -114,6 +155,42 @@ vec4 Posterization(vec2 texCoord){
     float level = lowerDiff <= upperDiff ? lower : upper;
     float adjustment = level / greyscale;
     return vec4(baseColor.rgb * adjustment, 1.0f);
+}
+
+//vec4 Fog(vec2 texCoord){
+//    float fogMin = 0.00;
+//    float fogMax = 0.97;//
+
+//    vec4 baseColor = texture(colorTarget, texCoord);
+//    vec4 fogColor  = texture(fogTexture,  texCoord);
+//    vec4 position = texture(positionTexture, texCoord);//
+
+//    float near = nearFar.x;
+//    float far  = nearFar.y;//
+
+//    float intensity = clamp((position.y - near) / (far - near), fogMin, fogMax);//
+
+//    return FragColor = vec4(baseColor.rgb, intensity);
+//    //FragColor = baseColor;
+//    //FragColor = mix(FragColor, fogColor, min(fogColor.a, 1));
+//}
+
+vec4 DepthOfField(vec2 texCoord){
+    float minDistance = 1.0;
+    float maxDistance = 3.0;
+
+    vec4 baseColor = texture(colorTarget, texCoord);
+    vec4 outOfBaseColor = texture(outOfColorTarget, texCoord);
+    vec4 position = texture(positionTexture, texCoord);
+    vec4 focusPoint = texture(positionTexture, mouseFocusPoint);
+
+    FragColor = baseColor;
+
+    float blur = smoothstep(minDistance, maxDistance, length(position - focusPoint));
+
+    FragColor = mix(baseColor, outOfBaseColor, blur);
+    FragColor1 = vec4(blur);
+    return FragColor;
 }
 
 void main()
@@ -157,7 +234,7 @@ void main()
         }
         case 5: // ScanLines
         {
-            FragColor = Default(texCoord);
+            FragColor = ScanLines(texCoord);
             break;  
         }
         case 6: // Grey Scale
@@ -172,7 +249,7 @@ void main()
         }
         case 8: // Pixilizer easy
         {
-            FragColor = Default(texCoord);
+            FragColor = Pixilizer(texCoord);
             break;  
         }
         case 9: // Posterization easy
@@ -187,7 +264,7 @@ void main()
         }
         case 11: // Depth of Field
         {
-            FragColor = Default(texCoord);
+            FragColor = DepthOfField(texCoord);
             break;  
         }
 

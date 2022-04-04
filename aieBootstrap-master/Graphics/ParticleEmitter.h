@@ -39,9 +39,7 @@ public:
 	glm::vec3 GetPosition() { return m_position; }
 	void SetPosition(glm::vec3 a_position) { m_position = a_position; };
 
-protected:
-
-	Particle*		m_particles;
+	Particle* m_particles;
 	unsigned int	m_firstDead;
 	unsigned int	m_maxParticles;
 
@@ -66,6 +64,12 @@ protected:
 
 	glm::vec3		m_gravity = { 0,0,0 };
 	bool			m_hasGravity = false;
+
+	bool			isDraw = false;
+
+protected:
+
+	
 
 };
 

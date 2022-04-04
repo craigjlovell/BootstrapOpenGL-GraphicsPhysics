@@ -60,6 +60,10 @@ bool GraphicsApp::startup()
 	t_rotation = { 0, 0, 0 };
 	t_scale	   = { 1, 1, 1 };
 
+	t_position2 = { 0, 0, 0 };
+	t_rotation2 = { 0, 0, 0 };
+	t_scale2 = { 1, 1, 1 };
+
 	m_scene = new Scene(m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 	//scale = { .5f ,.5f ,.5f };
@@ -109,17 +113,48 @@ void GraphicsApp::update(float deltaTime)
 	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
 
+	ImGui::Begin("particles Settings");
+	ImGui::DragFloat3("particles pos", &m_emitter->m_position[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles rate", &m_emitter->m_emitRate, 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles timer", &m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles lifemin", &m_emitter->m_lifespanMin, 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles lifemax", &m_emitter->m_lifespanMax, 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles start color", &m_emitter->m_startColor[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles end color", &m_emitter->m_endColor[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles start size", &m_emitter->m_startSize, 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles end size", &m_emitter->m_endSize, 0.1f, -1.0f, 1.0f);
+	ImGui::Checkbox("particles IsDraw", &m_emitter->isDraw);
+	ImGui::End();
+
+	
 	//ImGui::Begin("Object Local Transform");
-	//ImGui::DragFloat3("Position", (float *) (&m_raygunIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f);
+	//ImGui::DragFloat3("Position", (float *) (&m_raygunIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f); 
+	//
+	//glm::vec3 change = {0,0,0};
+	//ImGui::DragFloat3("Rotation", &change[0], 0.1f, -20.0f, 20.0f);
+	//m_raygunIns->SetRotation(change.y, change.x, change.z);
+	//
+	//glm::vec3 scale = m_raygunIns->GetScale();
+	//ImGui::DragFloat3("Scale", &scale[0], 0.1f, -20.0f, 20.0f);
+	//m_raygunIns->SetSize(scale, scale, scale);
+	//
 	//ImGui::End();
 
 	auto* obj = m_scene->GetInstances().back();
-	ImGui::Begin("Object Local Transform");
+	ImGui::Begin("Raygun Local Transform");
 	ImGui::DragFloat3("Position", &t_position[0], 0.1f, -20.0f, 20.0f);
 	ImGui::DragFloat3("Rotation", &t_rotation[0], 0.1f, -20.0f, 20.0f);
 	ImGui::DragFloat3("scale", &t_scale[0], 0.1f, -1.0f, 20.0f);
 	ImGui::End();
 	obj->SetTransform(obj->MakeTransform(t_position, t_rotation, t_scale));
+
+	auto* obj2 = m_scene->GetInstances().front();
+	ImGui::Begin("Spear Local Transform");
+	ImGui::DragFloat3("Position", &t_position2[0], 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat3("Rotation", &t_rotation2[0], 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat3("scale", &t_scale2[0], 0.1f, -1.0f, 20.0f);
+	ImGui::End();
+	obj2->SetTransform(obj2->MakeTransform(t_position2, t_rotation2, t_scale2));
 
 	ImGui::Begin("Bunny Local Transform");
 	ImGui::DragFloat("Position", (float*) &m_bunnyTransform[3], 0.1f, -20.0f, 20.0f);
@@ -131,7 +166,8 @@ void GraphicsApp::update(float deltaTime)
 	m_flyCamera->SetSpeed();
 	m_flyCamera->update(deltaTime);
 
-	m_emitter->Update(deltaTime, m_flyCamera->GetTransform(m_flyCamera->GetPosition(), glm::vec3(0), glm::vec3(1)));
+	if(m_emitter->isDraw == true)
+		m_emitter->Update(deltaTime, m_flyCamera->GetTransform(m_flyCamera->GetPosition(), glm::vec3(0), glm::vec3(1)));
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -187,13 +223,13 @@ void GraphicsApp::draw()
 	m_particleShader.bind();
 	pvm = projectionMatrix * viewMatrix * m_particleTransform;
 	m_particleShader.bindUniform("ProjectionViewModel", pvm);
-	m_emitter->Draw();
+	if (m_emitter->isDraw == true)
+		m_emitter->Draw();
 	
-	//m_shader.bind();
-	//m_modelTransform = m_quadTransform;
-	//pvm = projectionMatrix * viewMatrix * m_modelTransform;
-	//m_shader.bindUniform("ProjectionViewModel", pvm);
-	//m_quadMesh.draw();
+	m_shader.bind();
+	pvm = projectionMatrix * viewMatrix * m_hexTransform;
+	m_shader.bindUniform("ProjectionViewModel", pvm);
+	m_hexMesh.draw();
 
 	#pragma region Textured Quad Mesh
 	// Bind the shader
@@ -226,6 +262,11 @@ void GraphicsApp::draw()
 	m_advancePostShader.bind();
 	m_advancePostShader.bindUniform("colorTarget", 0);
 	m_advancePostShader.bindUniform("postProcessTarget", m_postProcessEffect);
+	m_advancePostShader.bindUniform("screensize", glm::vec2(getWindowWidth(), getWindowHeight()));
+	m_advancePostShader.bindUniform("deltaTime", m_dt);
+	m_advancePostShader.bindUniform("outOfColorTarget", 1);
+	m_advancePostShader.bindUniform("positionTexture", 0);
+	m_advancePostShader.bindUniform("mouseFocusPoint", glm::vec2(0,0));
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_screenQuad.draw();
@@ -435,15 +476,16 @@ bool GraphicsApp::LaunchSahders()
 		1  ,0  ,0  ,0,
 		0  ,1  ,0  ,0,
 		0  ,0  ,1  ,0,
-		0  ,0  ,0  ,1 };
+		4  ,0  ,0  ,1 };
 
 	m_marbleTexture.load("./textures/marble2.jpg");
 	m_hatchingTexture.load("./textures/Ramp02.png");
 	m_rampTexture.load("./textures/ramps.png", true);
 	
-	for (int i = 0; i < 10; i++)
-		m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
+	//for (int i = 0; i < 10; i++)
+	//	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
 	m_raygunIns = new Instance(m_raygunTransform, &m_raygunMesh, &m_normalMapShader);
+	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
 	m_scene->AddInstance(m_raygunIns);
 
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
@@ -480,9 +522,9 @@ void GraphicsApp::CreateBox()
 	m_cubeMesh.Initialise(8, verticies, 36, indicies);
 
 	m_cubeTransform = {
-		1  ,0  ,0  ,0,
-		0  ,1  ,0  ,0,
-		0  ,0  ,1  ,0,
+		10  ,0  ,0  ,0,
+		0  ,10  ,0  ,0,
+		0  ,0  ,10  ,0,
 		0  ,0  ,0  ,1 };
 }
 
@@ -505,21 +547,22 @@ void GraphicsApp::CreatePyramid()
 
 	m_pyMesh.Initialise(5, verticies, 18, indicies);
 	m_pyTransform = {
-		1  ,0  ,0  ,0,
-		0  ,1  ,0  ,0,
-		0  ,0  ,1  ,0,
+		10  ,0  ,0  ,0,
+		0  ,10  ,0  ,0,
+		0  ,0  ,10  ,0,
 		0  ,0  ,0  ,1 };
 }
 
 void GraphicsApp::CreateHex()
 {
-	Mesh::Vertex verticies[6];
-	verticies[0].position = { -0.5f, 0.0f, -1.0f, 1};
-	verticies[1].position = { 0.5f, 0.0f, -1.0f,1   };
-	verticies[2].position = { 1.0f, 0.0f, 0.0f,1   };
-	verticies[3].position = { 0.5f, 0.0f, 1.0f,1  };
-	verticies[4].position = { -0.5f, 0.0f, 1.0f,1};
-	verticies[5].position = { -1.0f, 0.0f, 0.0f, 1};
+	Mesh::Vertex verticies[7];
+	verticies[0].position = { 0, 0.0f, 0, 1};
+	verticies[1].position = { -0.5f, 0.0f, -1.0f, 1};
+	verticies[2].position = { 0.5f, 0.0f, -1.0f,1   };
+	verticies[3].position = { 1.0f, 0.0f, 0.0f,1   };
+	verticies[4].position = { 0.5f, 0.0f, 1.0f,1  };
+	verticies[5].position = { -0.5f, 0.0f, 1.0f,1};
+	verticies[6].position = { -1.0f, 0.0f, 0.0f, 1};
 
 	unsigned int indicies[18] = {
 								 1,6,0,
@@ -529,11 +572,11 @@ void GraphicsApp::CreateHex()
 								 3,2,0,
 								 2,1,0};
 
-	m_hexMesh.Initialise(6, verticies, 18, indicies);
+	m_hexMesh.Initialise(7, verticies, 18, indicies);
 	m_hexTransform = {
-		1  ,0  ,0  ,0,
-		0  ,1  ,0  ,0,
-		0  ,0  ,1  ,0,
+		10  ,0  ,0  ,0,
+		0  ,10  ,0  ,0,
+		0  ,0  ,10  ,0,
 		0  ,0  ,0  ,1 };
 }
 
@@ -547,14 +590,4 @@ void GraphicsApp::CreateGrid()
 		}
 	}
 
-}
-
-void GraphicsApp::InitialiseOurParticles()
-{
-	
-}
-
-void GraphicsApp::DrawParticles(glm::mat4 a_pvm)
-{
-	
 }
