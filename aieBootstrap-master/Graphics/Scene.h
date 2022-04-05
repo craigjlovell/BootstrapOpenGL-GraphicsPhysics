@@ -32,16 +32,20 @@ public:
 	void AddInstance(Instance* a_instance);
 	void Draw();
 
-	Camera*					GetCamera()				{ return m_camera; }
-	glm::vec2				GetWindowSize()			{ return m_windowSize; }
-	Light&					GetGlobalLight()		{ return m_globalDirLight; }
-	glm::vec3				GetAmibentLight()		{ return m_ambientLight; }
-	std::vector<Light>&		GetPointLights()		{ return m_pointLights; }
-	int						GetNumLights()			{ return (int)m_pointLights.size(); }
-	std::list<Instance*>	GetInstances()			{ return m_instances; }
+	Camera*					GetCamera()					{ return m_camera; }
+	void					SetCamera(Camera* a_cam)	{ m_camera = a_cam; }
 
-	glm::vec3*		GetPointLightPositions()	{ return &m_pointLightPositions[0]; }
-	glm::vec3*		GetPointLightColors()		{ return &m_pointLightColors[0]; }
+	glm::vec2				GetWindowSize()				{ return m_windowSize; }
+	Light&					GetGlobalLight()			{ return m_globalDirLight; }
+	glm::vec3				GetAmibentLight()			{ return m_ambientLight; }
+	std::vector<Light>&		GetPointLights()			{ return m_pointLights; }
+	int						GetNumLights()				{ return (int)m_pointLights.size(); }
+
+	std::list<Instance*>&	GetInstances()				{ return m_instances; }
+	void					SetInstances(std::list<Instance*> a_inst) { m_instances = a_inst; }
+
+	glm::vec3*				GetPointLightPositions()	{ return &m_pointLightPositions[0]; }
+	glm::vec3*				GetPointLightColors()		{ return &m_pointLightColors[0]; }
 
 	void			SetPointLights(Light a_light) { m_pointLights.push_back(a_light); }
 	void			AddPointLights(glm::vec3 a_direction, glm::vec3 a_color, float a_intensity) 

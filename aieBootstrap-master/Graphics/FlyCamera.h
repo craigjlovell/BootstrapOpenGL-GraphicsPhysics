@@ -11,8 +11,8 @@ public:
 
 	virtual void update(float a_deltaTime);
 
-	void SetSpeed();
-	float Getspeed() { return m_speed; };
+	void SetSpeed(float _speed) { m_speed = _speed; }
+	float GetSpeed() { return m_speed; }
 
 protected:
 

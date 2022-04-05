@@ -47,11 +47,12 @@ void FlyCamera::update(float a_deltaTime)
 	}
 	m_lastMouseX = mx;
 	m_lastMouseY = my;
+	//SetSpeed();
 }
 
-void FlyCamera::SetSpeed()
-{
-	ImGui::Begin("Speed Settings");
-	ImGui::DragFloat("Speed", &m_speed, 0.1f, 1.0f, 100.0f);
-	ImGui::End();
-}
+//void FlyCamera::SetSpeed()
+//{
+//	ImGui::Begin("Speed Settings");
+//	ImGui::DragFloat("Speed", &m_speed, 0.1f, 1.0f, 100.0f);
+//	ImGui::End();
+//}

@@ -8,7 +8,7 @@ uniform vec2 screensize;
 uniform int postProcessTarget;
 uniform float deltaTime;
 
-uniform sampler2D outOfColorTarget;
+uniform sampler2D outOfFocusTexture;
 uniform sampler2D positionTexture;
 uniform vec2 mouseFocusPoint;
 
@@ -179,17 +179,19 @@ vec4 DepthOfField(vec2 texCoord){
     float minDistance = 1.0;
     float maxDistance = 3.0;
 
-    vec4 baseColor = texture(colorTarget, texCoord);
-    vec4 outOfBaseColor = texture(outOfColorTarget, texCoord);
+    vec4 focusColor      = texture(colorTarget, texCoord);
+    vec4 outOfFocusColor = texture(outOfFocusTexture, texCoord);
     vec4 position = texture(positionTexture, texCoord);
     vec4 focusPoint = texture(positionTexture, mouseFocusPoint);
 
-    FragColor = baseColor;
+    float blur =
+    smoothstep
+      ( minDistance
+      , maxDistance
+      , abs(position.y - focusPoint.y)
+      );
 
-    float blur = smoothstep(minDistance, maxDistance, length(position - focusPoint));
-
-    FragColor = mix(baseColor, outOfBaseColor, blur);
-    FragColor1 = vec4(blur);
+    FragColor = mix(focusColor, outOfFocusColor, blur);
     return FragColor;
 }
 

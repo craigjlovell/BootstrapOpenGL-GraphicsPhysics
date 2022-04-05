@@ -53,6 +53,9 @@ public:
 
 protected:
 
+	bool isFly = false;
+	bool isStatinary = false;
+
 	float m_dt = 0;
 
 	glm::vec3 t_rotation;
@@ -94,13 +97,14 @@ protected:
 
 	aie::RenderTarget	m_renderTarget;
 
-	Camera*				m_camera;
+	std::vector<Camera*>				m_cameras;
+	int camIndex;
 	FlyCamera*			m_flyCamera;
 	StationaryCamera	m_stationaryCamera;
 
 	// For Post-Processing
 	Mesh				m_screenQuad;
-	int					m_postProcessEffect = PostProcessingEffect::DEPTH_OF_VIEW;
+	int					m_postProcessEffect = PostProcessingEffect::DEFAULT;
 	glm::mat4			m_modelTransform;
 
 	// Generic quad data

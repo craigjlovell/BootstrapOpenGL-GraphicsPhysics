@@ -11,6 +11,11 @@
 #include "Instance.h"
 #include "Scene.h"
 
+#include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
@@ -38,8 +43,10 @@ bool GraphicsApp::startup()
 	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
 	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
-	m_camera = new Camera();
-	m_flyCamera = new FlyCamera();
+	camIndex = 0;
+	m_cameras.push_back(new FlyCamera());	
+	m_cameras.push_back(new StationaryCamera());
+	m_cameras.push_back(new Camera());
 
 	// Default Light Values
 	Light light;
@@ -64,9 +71,7 @@ bool GraphicsApp::startup()
 	t_rotation2 = { 0, 0, 0 };
 	t_scale2 = { 1, 1, 1 };
 
-	m_scene = new Scene(m_flyCamera, glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
-
-	//scale = { .5f ,.5f ,.5f };
+	m_scene = new Scene(m_cameras[camIndex], glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 25);
 	m_scene->AddPointLights(glm::vec3(-5, 3, 0), glm::vec3(0, 0, 1), 50);
@@ -113,61 +118,91 @@ void GraphicsApp::update(float deltaTime)
 	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
 	ImGui::End();
 
+#pragma region Particles ImGui
 	ImGui::Begin("particles Settings");
-	ImGui::DragFloat3("particles pos", &m_emitter->m_position[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles rate", &m_emitter->m_emitRate, 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles timer", &m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles lifemin", &m_emitter->m_lifespanMin, 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles lifemax", &m_emitter->m_lifespanMax, 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles start color", &m_emitter->m_startColor[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles end color", &m_emitter->m_endColor[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles start size", &m_emitter->m_startSize, 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles end size", &m_emitter->m_endSize, 0.1f, -1.0f, 1.0f);
-	ImGui::Checkbox("particles IsDraw", &m_emitter->isDraw);
+	ImGui::DragFloat3("particles pos",			&m_emitter->GetPosition()[0], 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat("particles rate",			m_emitter->GetEmiteRate(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles timer",			&m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
+	m_emitter->SetEmitRate();
+	ImGui::DragFloat("particles lifemin",		m_emitter->GetMinLife(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles lifemax",		m_emitter->GetMaxLife(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles start color",	&m_emitter->GetStartColor()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles end color",	&m_emitter->GetEndColor()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles start size",	m_emitter->GetStartSize(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles end size",		m_emitter->GetEndSize(), 0.1f, -1.0f, 1.0f);
+	ImGui::Checkbox("particles IsDraw",			&m_emitter->isDraw);
 	ImGui::End();
-
+#pragma endregion
 	
-	//ImGui::Begin("Object Local Transform");
-	//ImGui::DragFloat3("Position", (float *) (&m_raygunIns->GetTransform()[3]), 0.1f, -20.0f, 20.0f); 
-	//
-	//glm::vec3 change = {0,0,0};
-	//ImGui::DragFloat3("Rotation", &change[0], 0.1f, -20.0f, 20.0f);
-	//m_raygunIns->SetRotation(change.y, change.x, change.z);
-	//
-	//glm::vec3 scale = m_raygunIns->GetScale();
-	//ImGui::DragFloat3("Scale", &scale[0], 0.1f, -20.0f, 20.0f);
-	//m_raygunIns->SetSize(scale, scale, scale);
-	//
-	//ImGui::End();
+#pragma region Objects ImGui
+	ImGui::Begin("Instances");
+	int i = 0;
+	for (auto it = m_scene->GetInstances().begin(); it != m_scene->GetInstances().end(); it++)
+	{
+		i++;
+		std::string id = std::to_string(i);		
+		Instance* inst = *it;
+		ImGui::BeginGroup();
+		ImGui::CollapsingHeader(("Objects Transforms" + id).c_str());
 
-	auto* obj = m_scene->GetInstances().back();
-	ImGui::Begin("Raygun Local Transform");
-	ImGui::DragFloat3("Position", &t_position[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat3("Rotation", &t_rotation[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat3("scale", &t_scale[0], 0.1f, -1.0f, 20.0f);
+		//std::string posStrin
+		glm::vec3 pos = inst->GetPosition();
+		ImGui::DragFloat3(("Postition" + id).c_str(), &pos.x, 0.1f, -20, 20);
+
+		glm::vec3 rot = inst->GetRotation();
+		ImGui::DragFloat3(("Rotation" + id).c_str(), &rot.x, 0.1f, -360, 360);
+		inst->SetRotation(rot);
+
+		glm::vec3 scale = inst->GetScale();
+		ImGui::DragFloat3(("Scale" + id).c_str(), &scale.x, 0.1f, -20, 20);
+
+		//ImGui::DragFloat3("Rotation", rot, 0.1f);			
+		inst->SetTransform(inst->MakeTransform(pos, rot, scale));
+
+		ImGui::EndGroup();
+
+	}
 	ImGui::End();
-	obj->SetTransform(obj->MakeTransform(t_position, t_rotation, t_scale));
-
-	auto* obj2 = m_scene->GetInstances().front();
-	ImGui::Begin("Spear Local Transform");
-	ImGui::DragFloat3("Position", &t_position2[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat3("Rotation", &t_rotation2[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat3("scale", &t_scale2[0], 0.1f, -1.0f, 20.0f);
-	ImGui::End();
-	obj2->SetTransform(obj2->MakeTransform(t_position2, t_rotation2, t_scale2));
-
-	ImGui::Begin("Bunny Local Transform");
-	ImGui::DragFloat("Position", (float*) &m_bunnyTransform[3], 0.1f, -20.0f, 20.0f);
-	ImGui::End();
-
+#pragma endregion
 
 	// Run Camera Update
-	m_camera->update(deltaTime);
-	m_flyCamera->SetSpeed();
-	m_flyCamera->update(deltaTime);
+	m_cameras[camIndex]->update(deltaTime);
+	FlyCamera* flyCam = dynamic_cast<FlyCamera*>(m_cameras[camIndex]);
+	StationaryCamera* StatinaryCam = dynamic_cast<StationaryCamera*>(m_cameras[camIndex]);
+
+	ImGui::Begin("Camera Settings");
+	ImGui::Checkbox("Fly", &isFly);
+	ImGui::Checkbox("Stationary", &isStatinary);
+
+	if (isFly == true)
+	{
+		camIndex = 0;
+		m_scene->SetCamera(m_cameras[camIndex]);
+		if (flyCam != nullptr)
+		{			
+			float speed = flyCam->GetSpeed();
+			ImGui::DragFloat("FlyCam Speed", &speed, 1, 0, 20.0f);
+			flyCam->SetSpeed(speed);
+		}
+	}
+	else if (isStatinary == true)
+	{
+		camIndex = 1;
+		m_scene->SetCamera(m_cameras[camIndex]);
+		if (StatinaryCam != nullptr)
+		{
+			StationaryCamera(glm::vec3{ -10,2,0 }, m_stationaryCamera.GetRotation());
+		}
+	}
+	else
+	{
+		camIndex = 2;
+		m_scene->SetCamera(m_cameras[camIndex]);
+	}
+	ImGui::End();
 
 	if(m_emitter->isDraw == true)
-		m_emitter->Update(deltaTime, m_flyCamera->GetTransform(m_flyCamera->GetPosition(), glm::vec3(0), glm::vec3(1)));
+		m_emitter->Update(deltaTime, m_cameras[camIndex]->GetTransform(m_cameras[camIndex]->GetPosition(), glm::vec3(0), glm::vec3(1)));
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -191,8 +226,8 @@ void GraphicsApp::draw()
 
 	// update perspective based on screen size
 	//m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f, getWindowWidth() / (float)getWindowHeight(), 0.1f, 1000.0f);
-	glm::mat4 projectionMatrix = m_flyCamera->GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
-	glm::mat4 viewMatrix = m_flyCamera->GetViewMatrix();
+	glm::mat4 projectionMatrix = m_cameras[camIndex]->GetProjectionMatrix((float)getWindowWidth(), (float)getWindowHeight());
+	glm::mat4 viewMatrix = m_cameras[camIndex]->GetViewMatrix();
 	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
@@ -202,7 +237,7 @@ void GraphicsApp::draw()
 	m_phongExtShader.bindUniform("LightDirection", m_scene->GetGlobalLight().direction);
 	m_phongExtShader.bindUniform("AmbientColor", m_scene->GetAmibentLight());
 	m_phongExtShader.bindUniform("LightColor", m_scene->GetGlobalLight().color);
-	m_phongExtShader.bindUniform("CameraPosition", m_flyCamera->GetPosition());
+	m_phongExtShader.bindUniform("CameraPosition", m_cameras[camIndex]->GetPosition());
 
 	pvm = projectionMatrix * viewMatrix * m_bunnyTransform;
 	m_phongExtShader.bindUniform("ProjectionViewModel", pvm);
@@ -264,9 +299,10 @@ void GraphicsApp::draw()
 	m_advancePostShader.bindUniform("postProcessTarget", m_postProcessEffect);
 	m_advancePostShader.bindUniform("screensize", glm::vec2(getWindowWidth(), getWindowHeight()));
 	m_advancePostShader.bindUniform("deltaTime", m_dt);
-	m_advancePostShader.bindUniform("outOfColorTarget", 1);
-	m_advancePostShader.bindUniform("positionTexture", 0);
-	m_advancePostShader.bindUniform("mouseFocusPoint", glm::vec2(0,0));
+
+	//m_advancePostShader.bindUniform("outOfFocusTexture", 0);
+	//m_advancePostShader.bindUniform("positionTexture", 0);
+	//m_advancePostShader.bindUniform("mouseFocusPoint", glm::vec2(getWindowWidth(), getWindowHeight()));
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_screenQuad.draw();
@@ -465,10 +501,10 @@ bool GraphicsApp::LaunchSahders()
 		return false;
 	}
 	m_raygunTransform = {
-		0.5f  ,0  ,0  ,0,
-		0  ,0.5f  ,0  ,0,
-		0  ,0  ,0.5f  ,0,
-		0 ,0 ,0 ,1 };
+		1	,0  ,0  ,0,
+		0	,1  ,0  ,0,
+		0	,0  ,1  ,0,
+		0	,0	,0	,1 };
 	
 	#pragma endregion
 
@@ -484,9 +520,8 @@ bool GraphicsApp::LaunchSahders()
 	
 	//for (int i = 0; i < 10; i++)
 	//	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
-	m_raygunIns = new Instance(m_raygunTransform, &m_raygunMesh, &m_normalMapShader);
+	m_scene->AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1,1,1), &m_raygunMesh, &m_normalMapShader));
 	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
-	m_scene->AddInstance(m_raygunIns);
 
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
 

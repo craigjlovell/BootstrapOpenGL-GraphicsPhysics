@@ -10,6 +10,8 @@ public:
 
 	virtual void update(float deltaTime = 0);
 
+	void draw();
+
 	void SetPosition(glm::vec3 a_position);
 	glm::vec3 GetPosition();// couldnt i just return m_pos 
 							//and ignore the function and set
@@ -22,7 +24,7 @@ public:
 	void SetScale(glm::vec3 a_scale);
 	glm::vec3 GetScale();
 
-	void SetLookAt(glm::vec3 form, glm::vec3 to, glm::vec3 up);
+	void SetLookAt(glm::vec3 from, glm::vec3 to, glm::vec3 up);
 	void SetPerspective(float fieldOfView, float aspectRatio, float near, float far);
 
 	glm::mat4 GetLocalTransform() { return m_local; }
@@ -38,10 +40,6 @@ public:
 	glm::mat4 MakeTransform();
 
 protected:
-
-	void UpdateProjectionViewTransform();
-
-	
 
 	glm::mat4 m_worldTransform;
 	glm::mat4 m_projectionTransform;
@@ -66,4 +64,7 @@ protected:
 			0,	0,	1,	0,	// 2
 			0,	0,	0,	1	// 3
 	};//	x	y	z	w
+
+private:
+	void UpdateProjectionViewTransform();
 };

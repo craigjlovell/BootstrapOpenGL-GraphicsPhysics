@@ -1,14 +1,13 @@
 #include "Camera.h"
 #include "glm/ext.hpp"
 #include "Input.h"
+#include <Gizmos.h>
 
 Camera::Camera()
 {
 	m_theta = 0;
 	m_phi = 0;
-	SetPosition(glm::vec3(-10, 2, 0));
-	SetRotation(glm::vec3(0, 0, 0));
-	SetScale(glm::vec3(1, 1, 1));
+	m_position = glm::vec3(-10, 2, 0);
 }
 
 Camera::~Camera()
@@ -17,7 +16,12 @@ Camera::~Camera()
 
 void Camera::update(float deltaTime)
 {
-	
+	UpdateProjectionViewTransform();
+}
+
+void Camera::draw()
+{
+	aie::Gizmos::addSphere(GetPosition(), 0.1f, 10, 10, { 1,0,0,1 });
 }
 
 void Camera::SetPosition(glm::vec3 a_position)
@@ -154,15 +158,17 @@ glm::vec3 Camera::GetScale()
 	tempVec.y = glm::length(y);
 	tempVec.z = glm::length(z);
 
-	return tempVec;
+	return m_scale;
 }
 
-void Camera::SetLookAt(glm::vec3 form, glm::vec3 to, glm::vec3 up)
+void Camera::SetLookAt(glm::vec3 from, glm::vec3 to, glm::vec3 up)
 {
+	m_viewTransform = glm::lookAt(from, to, up);
 }
 
-void Camera::SetPerspective(float fieldOfView, float aspectRatio, float, float)
+void Camera::SetPerspective(float fieldOfView, float aspectRatio, float near, float far)
 {
+	m_projectionTransform = glm::perspective(glm::pi<float>() * fieldOfView, aspectRatio, near, far);
 }
 
 glm::mat4 Camera::GetWorldTransform()
@@ -179,7 +185,7 @@ glm::mat4 Camera::GetWorldTransform()
 
 glm::mat4 Camera::GetProjectionView(float w, float h)
 {
-	return GetViewMatrix() * GetProjectionMatrix(w, h);
+	return m_projectionViewTransform;
 }
 
 glm::mat4 Camera::GetViewMatrix()
@@ -197,6 +203,7 @@ glm::mat4 Camera::GetProjectionMatrix(float w, float h)
 
 void Camera::UpdateProjectionViewTransform()
 {
+	m_projectionViewTransform = m_projectionTransform * m_viewTransform;
 }
 
 glm::mat4 Camera::GetTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale)

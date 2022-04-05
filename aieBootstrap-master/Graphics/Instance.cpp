@@ -16,10 +16,11 @@ Instance::Instance(glm::mat4 a_transform, aie::OBJMesh* a_mesh, aie::ShaderProgr
 
 }
 
-Instance::Instance(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale, aie::OBJMesh* a_mesh, aie::ShaderProgram* a_shader) :
+Instance::Instance(glm::vec3 a_position, glm::vec3 a_rotation, glm::vec3 a_scale, aie::OBJMesh* a_mesh, aie::ShaderProgram* a_shader) :
 	m_mesh(a_mesh), m_shader(a_shader)
 {
-	m_transform = MakeTransform(a_position, a_eulerAngles, a_scale);
+	m_rotation = a_rotation;
+	m_transform = MakeTransform(a_position, a_rotation, a_scale);
 }
 
 void Instance::Draw(Scene* a_scene)
@@ -52,28 +53,22 @@ void Instance::Draw(Scene* a_scene)
 	m_mesh->draw();
 }
 
-glm::mat4 Instance::MakeTransform(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale)
+glm::mat4 Instance::MakeTransform(glm::vec3 a_position, glm::vec3 a_rotation, glm::vec3 a_scale)
 {
 	return glm::translate(glm::mat4(1), a_position)
 		* glm::rotate(glm::mat4(1),
-			glm::radians(a_eulerAngles.z), glm::vec3(0, 0, 1))
+			glm::radians(a_rotation.x), glm::vec3(1, 0, 0))
 		* glm::rotate(glm::mat4(1),
-			glm::radians(a_eulerAngles.y), glm::vec3(0, 1, 0))
+			glm::radians(a_rotation.y), glm::vec3(0, 1, 0))
 		* glm::rotate(glm::mat4(1),
-			glm::radians(a_eulerAngles.x), glm::vec3(1, 0, 0))
+			glm::radians(a_rotation.z), glm::vec3(0, 0, 1))
 		* glm::scale(glm::mat4(1), a_scale);
 }
 
-void Instance::SetRotation(float a_eulerAngles, float a_eulerAngles1, float a_eulerAngles2)
-{
-	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles), glm::vec3(0, 1, 0)));
-	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles1), glm::vec3(1, 0, 0)));
-	SetTransform(glm::rotate(GetTransform(), glm::radians(a_eulerAngles2), glm::vec3(0, 0, 1)));
-}
-
-void Instance::SetSize(glm::vec3 a_eulerAngles, glm::vec3 a_eulerAngles1, glm::vec3 a_eulerAngles2)
-{
-	SetTransform(glm::scale(GetTransform(), a_eulerAngles));
-	SetTransform(glm::scale(GetTransform(), a_eulerAngles1));
-	SetTransform(glm::scale(GetTransform(), a_eulerAngles2));
-}
+//void Instance::SetRotation(glm::vec3 a_rotation)
+//{
+//	glm::quat quaternion = glm::quat_cast(m_transform); 
+//	glm::vec3 euler = glm::degrees(glm::eulerAngles(quaternion)); 
+//	float eulerRot[] = { euler.x, euler.y, euler.z };
+//	return;
+//}
