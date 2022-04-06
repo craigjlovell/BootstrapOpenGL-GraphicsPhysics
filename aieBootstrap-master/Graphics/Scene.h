@@ -32,6 +32,8 @@ public:
 	void AddInstance(Instance* a_instance);
 	void Draw();
 
+	void Update(float deltaTime);
+
 	Camera*					GetCamera()					{ return m_camera; }
 	void					SetCamera(Camera* a_cam)	{ m_camera = a_cam; }
 
@@ -40,6 +42,12 @@ public:
 	glm::vec3				GetAmibentLight()			{ return m_ambientLight; }
 	std::vector<Light>&		GetPointLights()			{ return m_pointLights; }
 	int						GetNumLights()				{ return (int)m_pointLights.size(); }
+
+	float					GetScreenTime()				{ return m_sceneRunTime; }
+
+	int						GetCamCount()				{ return m_camCount; }
+	int						GetCamIndex()				{ return m_camIndex; }
+	Camera*					GetCamIndexPoint(int a_index) { return m_cameras[a_index]; }
 
 	std::list<Instance*>&	GetInstances()				{ return m_instances; }
 	void					SetInstances(std::list<Instance*> a_inst) { m_instances = a_inst; }
@@ -54,6 +62,7 @@ public:
 protected:
 
 	Camera* m_camera;
+	Camera** m_cameras;
 	glm::vec2 m_windowSize;
 
 	Light m_globalDirLight;
@@ -63,6 +72,11 @@ protected:
 
 	glm::vec3 m_pointLightPositions[MAX_LIGHTS];
 	glm::vec3 m_pointLightColors[MAX_LIGHTS];
+
+	float m_sceneRunTime = 0;
+
+	int m_camIndex;
+	int m_camCount;
 
 };
 

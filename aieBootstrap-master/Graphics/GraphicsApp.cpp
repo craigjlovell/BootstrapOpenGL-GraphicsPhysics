@@ -63,14 +63,6 @@ bool GraphicsApp::startup()
 		glm::vec4(1, 0, 0, 1),
 		glm::vec4(1, 1, 0, 1));
 
-	t_position = { 0, 0, 0 };
-	t_rotation = { 0, 0, 0 };
-	t_scale	   = { 1, 1, 1 };
-
-	t_position2 = { 0, 0, 0 };
-	t_rotation2 = { 0, 0, 0 };
-	t_scale2 = { 1, 1, 1 };
-
 	m_scene = new Scene(m_cameras[camIndex], glm::vec2(getWindowWidth(), getWindowHeight()), light, m_ambientLight);
 
 	m_scene->AddPointLights(glm::vec3(5, 3, 0), glm::vec3(1, 0, 0), 25);
@@ -89,6 +81,7 @@ void GraphicsApp::shutdown()
 
 void GraphicsApp::update(float deltaTime) 
 {
+	m_dt += deltaTime;
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
 
@@ -113,93 +106,9 @@ void GraphicsApp::update(float deltaTime)
 	// Rotate the light
 	//m_light.direction = glm::normalize(glm::vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
 
-	ImGui::Begin("Light Settings");
-	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
-	ImGui::End();
-
-#pragma region Particles ImGui
-	ImGui::Begin("particles Settings");
-	ImGui::DragFloat3("particles pos",			&m_emitter->GetPosition()[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat("particles rate",			m_emitter->GetEmiteRate(), 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat("particles timer",			&m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
-	m_emitter->SetEmitRate();
-	ImGui::DragFloat("particles lifemin",		m_emitter->GetMinLife(), 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat("particles lifemax",		m_emitter->GetMaxLife(), 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles start color",	&m_emitter->GetStartColor()[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles end color",	&m_emitter->GetEndColor()[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat("particles start size",	m_emitter->GetStartSize(), 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat("particles end size",		m_emitter->GetEndSize(), 0.1f, -1.0f, 1.0f);
-	ImGui::Checkbox("particles IsDraw",			&m_emitter->isDraw);
-	ImGui::End();
-#pragma endregion
-	
-#pragma region Objects ImGui
-	ImGui::Begin("Instances");
-	int i = 0;
-	for (auto it = m_scene->GetInstances().begin(); it != m_scene->GetInstances().end(); it++)
-	{
-		i++;
-		std::string id = std::to_string(i);		
-		Instance* inst = *it;
-		ImGui::BeginGroup();
-		ImGui::CollapsingHeader(("Objects Transforms" + id).c_str());
-
-		//std::string posStrin
-		glm::vec3 pos = inst->GetPosition();
-		ImGui::DragFloat3(("Postition" + id).c_str(), &pos.x, 0.1f, -20, 20);
-
-		glm::vec3 rot = inst->GetRotation();
-		ImGui::DragFloat3(("Rotation" + id).c_str(), &rot.x, 0.1f, -360, 360);
-		inst->SetRotation(rot);
-
-		glm::vec3 scale = inst->GetScale();
-		ImGui::DragFloat3(("Scale" + id).c_str(), &scale.x, 0.1f, -20, 20);
-
-		//ImGui::DragFloat3("Rotation", rot, 0.1f);			
-		inst->SetTransform(inst->MakeTransform(pos, rot, scale));
-
-		ImGui::EndGroup();
-
-	}
-	ImGui::End();
-#pragma endregion
-
 	// Run Camera Update
 	m_cameras[camIndex]->update(deltaTime);
-	FlyCamera* flyCam = dynamic_cast<FlyCamera*>(m_cameras[camIndex]);
-	StationaryCamera* StatinaryCam = dynamic_cast<StationaryCamera*>(m_cameras[camIndex]);
-
-	ImGui::Begin("Camera Settings");
-	ImGui::Checkbox("Fly", &isFly);
-	ImGui::Checkbox("Stationary", &isStatinary);
-
-	if (isFly == true)
-	{
-		camIndex = 0;
-		m_scene->SetCamera(m_cameras[camIndex]);
-		if (flyCam != nullptr)
-		{			
-			float speed = flyCam->GetSpeed();
-			ImGui::DragFloat("FlyCam Speed", &speed, 1, 0, 20.0f);
-			flyCam->SetSpeed(speed);
-		}
-	}
-	else if (isStatinary == true)
-	{
-		camIndex = 1;
-		m_scene->SetCamera(m_cameras[camIndex]);
-		if (StatinaryCam != nullptr)
-		{
-			StationaryCamera(glm::vec3{ -10,2,0 }, m_stationaryCamera.GetRotation());
-		}
-	}
-	else
-	{
-		camIndex = 2;
-		m_scene->SetCamera(m_cameras[camIndex]);
-	}
-	ImGui::End();
+	ImGuiCreation();
 
 	if(m_emitter->isDraw == true)
 		m_emitter->Update(deltaTime, m_cameras[camIndex]->GetTransform(m_cameras[camIndex]->GetPosition(), glm::vec3(0), glm::vec3(1)));
@@ -231,7 +140,7 @@ void GraphicsApp::draw()
 	auto pvm = projectionMatrix * viewMatrix * glm::mat4(1);
 
 	m_scene->Draw();
-
+	
 #pragma region Bunny
 	m_phongExtShader.bind();
 	m_phongExtShader.bindUniform("LightDirection", m_scene->GetGlobalLight().direction);
@@ -521,7 +430,7 @@ bool GraphicsApp::LaunchSahders()
 	//for (int i = 0; i < 10; i++)
 	//	m_scene->AddInstance(new Instance(glm::vec3(i * 2, 0, 0), glm::vec3(0, i * 30, 0), glm::vec3(1, 1, 1), &m_spearMesh, &m_normalMapShader));
 	m_scene->AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1,1,1), &m_raygunMesh, &m_normalMapShader));
-	m_scene->AddInstance(new Instance(m_spearTransform, &m_spearMesh, &m_normalMapShader));
+	m_scene->AddInstance(new Instance(glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), glm::vec3(1,1,1), &m_spearMesh, &m_normalMapShader));
 
 	//m_scene->AddInstance(new Instance(m_bunnyTransform, &m_bunnyMesh, &m_phongShader));
 
@@ -624,5 +533,110 @@ void GraphicsApp::CreateGrid()
 			
 		}
 	}
+
+}
+
+void GraphicsApp::ImGuiCreation()
+{
+#pragma region Cam
+	FlyCamera* flyCam = dynamic_cast<FlyCamera*>(m_cameras[camIndex]);
+	StationaryCamera* StatinaryCam = dynamic_cast<StationaryCamera*>(m_cameras[camIndex]);
+
+	ImGui::Begin("Camera Settings");
+	ImGui::Checkbox("Fly", &isFly);
+	ImGui::Checkbox("Stationary", &isStatinary);
+
+	if (isFly == true)
+	{
+		camIndex = 0;
+		m_scene->SetCamera(m_cameras[camIndex]);
+		if (flyCam != nullptr)
+		{
+			float speed = flyCam->GetSpeed();
+			ImGui::DragFloat("FlyCam Speed", &speed, 1, 0, 20.0f);
+			flyCam->SetSpeed(speed);
+		}
+	}
+	else if (isStatinary == true)
+	{
+		camIndex = 1;
+		m_scene->SetCamera(m_cameras[camIndex]);
+		if (StatinaryCam != nullptr)
+		{
+			StationaryCamera(glm::vec3{ -10,2,0 }, m_stationaryCamera.GetRotation());
+		}
+	}
+	else
+	{
+		camIndex = 2;
+		m_scene->SetCamera(m_cameras[camIndex]);
+	}
+	ImGui::End();
+#pragma endregion
+#pragma region Lights
+	ImGui::Begin("Light Settings");
+	ImGui::DragFloat3("Global Light Direction", &m_scene->GetGlobalLight().direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Global Light Color", &m_scene->GetGlobalLight().color[0], 0.1f, 0.0f, 20.0f);
+	ImGui::End();
+
+	ImGui::Begin("Light Settings");
+	for (int i = 0; i < m_scene->GetNumLights(); i++)
+	{
+		std::string id = std::to_string(i + 1);
+
+		ImGui::DragFloat3(("Direction" + id).c_str(), &m_scene->GetPointLights()[i].direction[0], 0.1f);
+		ImGui::ColorEdit3(("Colour" + id).c_str(), &m_scene->GetPointLights()[i].color[0]);
+
+	}
+	ImGui::End();
+	m_scene->GetPointLights()[0].direction = glm::vec3(glm::cos(m_dt), m_scene->GetPointLights()[0].direction.y, glm::sin(m_dt * 2) / 2) * 10.0f;
+#pragma endregion
+
+#pragma region Particles ImGui
+	ImGui::Begin("particles Settings");
+	ImGui::DragFloat3("particles pos", &m_emitter->GetPosition()[0], 0.1f, -20.0f, 20.0f);
+	ImGui::DragFloat("particles rate", m_emitter->GetEmiteRate(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles timer", &m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
+	m_emitter->SetEmitRate();
+	ImGui::DragFloat("particles lifemin", m_emitter->GetMinLife(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles lifemax", m_emitter->GetMaxLife(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles start color", &m_emitter->GetStartColor()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles end color", &m_emitter->GetEndColor()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles start size", m_emitter->GetStartSize(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles end size", m_emitter->GetEndSize(), 0.1f, -1.0f, 1.0f);
+	ImGui::Checkbox("particles IsDraw", &m_emitter->isDraw);
+	ImGui::End();
+#pragma endregion
+
+#pragma region Objects ImGui
+	ImGui::Begin("Instances");
+	int i = 0;
+	for (auto it = m_scene->GetInstances().begin(); it != m_scene->GetInstances().end(); it++)
+	{
+		i++;
+		std::string id = std::to_string(i);
+		Instance* inst = *it;
+		ImGui::BeginGroup();
+		ImGui::CollapsingHeader(("Objects Transforms" + id).c_str());
+
+		//std::string posStrin
+		glm::vec3 pos = inst->GetPosition();
+		ImGui::DragFloat3(("Postition" + id).c_str(), &pos.x, 0.1f);
+
+		glm::vec3 rot = inst->GetRotation();
+		ImGui::DragFloat3(("Rotation" + id).c_str(), &rot.x, 0.1f);
+		inst->SetRotation(rot);
+
+		glm::vec3 scale = inst->GetScale();
+		ImGui::DragFloat3(("Scale" + id).c_str(), &scale.x, 0.1f);
+
+
+		//ImGui::DragFloat3("Rotation", rot, 0.1f);			
+		inst->SetTransform(inst->MakeTransform(pos, rot, scale));
+
+		ImGui::EndGroup();
+	}
+	ImGui::End();
+#pragma endregion
 
 }

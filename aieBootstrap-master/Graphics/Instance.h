@@ -2,8 +2,6 @@
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 
-
-
 class Camera;
 struct Light;
 class Scene;
@@ -16,14 +14,13 @@ namespace aie
 class Instance
 {
 public:
-
 	Instance(glm::mat4 a_transform, aie::OBJMesh* a_mesh, aie::ShaderProgram* a_shader);
 	Instance(glm::vec3 a_position, glm::vec3 a_eulerAngles, glm::vec3 a_scale, aie::OBJMesh* a_mesh, aie::ShaderProgram* a_shader);
 
 	void Draw(Scene* a_scene);
 
 	glm::mat4 MakeTransform(glm::vec3 a_position, glm::vec3 a_rotation, glm::vec3 a_scale);
-	glm::mat4 GetTransform() { return m_transform; /*return MakeTransform(m_position, m_rotation, m_scale);*/ }
+	glm::mat4 GetTransform() { return m_transform; }
 	void SetTransform(glm::mat4 a_transform) { m_transform = a_transform; }
 
 	//glm::vec3 GetRotation() { glm::quat quat = glm::quat_cast(m_transform); return glm::vec3(glm::degrees(glm::pitch(quat)), glm::degrees(glm::yaw(quat)), glm::degrees(glm::roll(quat))); }
@@ -31,6 +28,7 @@ public:
 	//	glm::rotate(glm::mat4(1), glm::radians(a_rotation.x), glm::vec3(1, 0, 0)) *
 	//	glm::rotate(glm::mat4(1), glm::radians(a_rotation.y), glm::vec3(0, 1, 0)) *
 	//	glm::rotate(glm::mat4(1), glm::radians(a_rotation.z), glm::vec3(0, 0, 1)); }
+
 	void SetRotation(glm::vec3 a_rotation) { m_rotation = a_rotation; }
 	glm::vec3 GetRotation() { return m_rotation; }
 
@@ -49,7 +47,6 @@ protected:
 	aie::ShaderProgram* m_shader;
 
 private:
-
 	glm::mat4 m_transform;
 };
 

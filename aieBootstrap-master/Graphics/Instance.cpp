@@ -55,6 +55,8 @@ void Instance::Draw(Scene* a_scene)
 
 glm::mat4 Instance::MakeTransform(glm::vec3 a_position, glm::vec3 a_rotation, glm::vec3 a_scale)
 {
+	glm::vec3 test = glm::vec3(0);
+		m_rotation = a_rotation;
 	return glm::translate(glm::mat4(1), a_position)
 		* glm::rotate(glm::mat4(1),
 			glm::radians(a_rotation.x), glm::vec3(1, 0, 0))

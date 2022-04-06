@@ -47,6 +47,8 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
+	void ImGuiCreation();
+
 	glm::mat4 Rotation(glm::mat4 matrix, char axis, float rotationAmount);
 
 	glm::vec3 scale;
@@ -57,14 +59,6 @@ protected:
 	bool isStatinary = false;
 
 	float m_dt = 0;
-
-	glm::vec3 t_rotation;
-	glm::vec3 t_scale;
-	glm::vec3 t_position;
-	glm::vec3 t_rotation2;
-	glm::vec3 t_scale2;
-	glm::vec3 t_position2;
-
 
 	bool LaunchSahders();
 
@@ -147,6 +141,7 @@ protected:
 	glm::vec3			m_ambientLight;
 
 	Scene*				m_scene;
+	Camera*				m_cam;
 
 	ParticleEmitter*	m_emitter;
 	glm::mat4			m_particleTransform;

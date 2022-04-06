@@ -6,11 +6,12 @@ class Camera
 public:
 
 	Camera();
+	Camera(glm::vec3 a_position);
 	~Camera();
 
 	virtual void update(float deltaTime = 0);
 
-	void draw();
+	virtual void draw();
 
 	void SetPosition(glm::vec3 a_position);
 	glm::vec3 GetPosition();// couldnt i just return m_pos 
@@ -45,7 +46,7 @@ protected:
 	glm::mat4 m_projectionTransform;
 	glm::mat4 m_projectionViewTransform;
 	glm::mat4 m_viewTransform;
-	
+
 	float m_theta;
 	float m_phi;
 
