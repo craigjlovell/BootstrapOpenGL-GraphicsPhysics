@@ -1,0 +1,89 @@
+#include "GameStateManager.h"
+#include "IGameState.h"
+
+
+GameStateManager::GameStateManager()
+{
+
+}
+
+GameStateManager::~GameStateManager()
+{
+	
+}
+
+bool GameStateManager::startup()
+{
+	return true;
+}
+
+void GameStateManager::shutdown()
+{
+	for (auto iter = m_states.begin(); iter != m_states.end(); iter++)
+	{
+		if (iter->second != nullptr)
+		{
+			iter->second->shutdown();
+			delete iter->second;
+		}
+	}
+	m_states.clear();
+}
+
+void GameStateManager::update(float dt)
+{
+	for (auto cmd : m_commands)
+		cmd();
+	m_commands.clear();
+
+	m_stack.back()->update(dt);
+}
+
+void GameStateManager::draw()
+{
+	for (auto state : m_stack)
+		state->draw();
+	
+}
+
+void GameStateManager::SetState(const char* name, IGameState* state)
+{
+	m_commands.push_back([=]()
+		{
+			if (m_states[name] != nullptr)
+			{
+				m_states[name]->shutdown();
+				delete m_states[name];
+			}
+
+			m_states[name] = state;
+
+			if (m_states[name] != nullptr)
+				m_states[name]->startup();
+			
+
+		});
+}
+
+void GameStateManager::PushState(const char* name)
+{
+	m_commands.push_back([=]()
+		{
+			m_stack.push_back(m_states[name]);
+		});
+}
+
+
+void GameStateManager::PopState()
+{
+	m_commands.push_back([=]()
+		{
+			m_stack.pop_back();
+		});
+
+}
+
+IGameState* GameStateManager::GetCurrentState()
+{
+	return m_stack.back();
+}
