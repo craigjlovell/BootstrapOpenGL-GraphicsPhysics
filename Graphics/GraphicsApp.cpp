@@ -621,14 +621,14 @@ void GraphicsApp::ImGuiCreation()
 
 		//std::string posStrin
 		glm::vec3 pos = inst->GetPosition();
-		ImGui::DragFloat3(("Postition" + id).c_str(), &pos.x, 0.1f);
+		ImGui::DragFloat3(("Postition" + id).c_str(), &pos.x, 0.1f, -100.0f, 100.0f);
 
 		glm::vec3 rot = inst->GetRotation();
-		ImGui::DragFloat3(("Rotation" + id).c_str(), &rot.x, 0.1f);
+		ImGui::DragFloat3(("Rotation" + id).c_str(), &rot.x, 0.1f, -360.0f, 360.0f);
 		inst->SetRotation(rot);
 
 		glm::vec3 scale = inst->GetScale();
-		ImGui::DragFloat3(("Scale" + id).c_str(), &scale.x, 0.1f);
+		ImGui::DragFloat3(("Scale" + id).c_str(), &scale.x, 0.1f, -10.0f, 10.0f);
 
 
 		//ImGui::DragFloat3("Rotation", rot, 0.1f);			

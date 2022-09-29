@@ -33,9 +33,11 @@ public:
 	glm::vec3 GetRotation() { return m_rotation; }
 
 	glm::vec3 GetScale() { return glm::vec3(
-		glm::length(glm::vec3(m_transform[0][0], m_transform[1][0], m_transform[2][0])), 
-		glm::length(glm::vec3(m_transform[0][1], m_transform[1][1], m_transform[2][1])), 
-		glm::length(glm::vec3(m_transform[0][2], m_transform[1][2], m_transform[2][2]))); }
+		glm::length(glm::vec3(m_transform[0][0], m_transform[0][1], m_transform[0][2])),
+		glm::length(glm::vec3(m_transform[1][0], m_transform[1][1], m_transform[1][2])),
+		glm::length(glm::vec3(m_transform[2][0], m_transform[2][1], m_transform[2][2])));
+	}
+
 	void SetScale(glm::vec3 a_scale) { m_transform = glm::scale(glm::mat4(1), a_scale); }
 	
 	glm::vec3 GetPosition() { return m_transform[3]; }
