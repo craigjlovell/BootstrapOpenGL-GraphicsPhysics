@@ -113,6 +113,10 @@ void GraphicsApp::update(float deltaTime)
 	if(m_emitter->isDraw == true)
 		m_emitter->Update(deltaTime, m_cameras[camIndex]->GetTransform(m_cameras[camIndex]->GetPosition(), glm::vec3(0), glm::vec3(1)));
 
+
+	m_scene->GetPointLights()[0].direction.x = glm::cos(m_dt) / 2 * 10.0f;
+	m_scene->GetPointLights()[0].direction.z = glm::sin(m_dt * 2) / 2 * 10.0f;
+
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
 
@@ -589,13 +593,13 @@ void GraphicsApp::ImGuiCreation()
 
 	}
 	ImGui::End();
-	m_scene->GetPointLights()[0].direction = glm::vec3(glm::cos(m_dt), m_scene->GetPointLights()[0].direction.y, glm::sin(m_dt * 2) / 2) * 10.0f;
+	
 #pragma endregion
 
 #pragma region Particles ImGui
 	ImGui::Begin("particles Settings");
 	ImGui::DragFloat3("particles pos", &m_emitter->GetPosition()[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat("particles rate", m_emitter->GetEmiteRate(), 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat("particles rate", m_emitter->GetEmiteRate(), 0.1f, 1.f, 10.0f);
 	ImGui::DragFloat("particles timer", &m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
 	m_emitter->SetEmitRate();
 	ImGui::DragFloat("particles lifemin", m_emitter->GetMinLife(), 0.1f, -1.0f, 1.0f);
