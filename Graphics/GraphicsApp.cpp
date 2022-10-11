@@ -51,7 +51,7 @@ bool GraphicsApp::startup()
 	// Default Light Values
 	Light light;
 	light.direction = { 1, -1, 1 };
-	light.color = { 1, 1, 1 };
+	light.color = { 1.f, 1.f, 1.f };
 	m_ambientLight = { 0.5f, 0.5f, 0.5f };
 
 	m_emitter = new ParticleEmitter();
