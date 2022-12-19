@@ -599,13 +599,13 @@ void GraphicsApp::ImGuiCreation()
 #pragma region Particles ImGui
 	ImGui::Begin("particles Settings");
 	ImGui::DragFloat3("particles pos", &m_emitter->GetPosition()[0], 0.1f, -20.0f, 20.0f);
-	ImGui::DragFloat("particles rate", m_emitter->GetEmiteRate(), 0.1f, 1.f, 10.0f);
+	ImGui::DragFloat("particles rate", m_emitter->GetEmiteRate(), 0.1f, 0.0022f, 10.0f);
 	ImGui::DragFloat("particles timer", &m_emitter->m_emitTimer, 0.1f, -1.0f, 1.0f);
 	m_emitter->SetEmitRate();
 	ImGui::DragFloat("particles lifemin", m_emitter->GetMinLife(), 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat("particles lifemax", m_emitter->GetMaxLife(), 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles start color", &m_emitter->GetStartColor()[0], 0.1f, -1.0f, 1.0f);
-	ImGui::DragFloat3("particles end color", &m_emitter->GetEndColor()[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("particles start color", &m_emitter->GetStartColor()[0]);
+	ImGui::DragFloat3("particles end color", &m_emitter->GetEndColor()[0]);
 	ImGui::DragFloat("particles start size", m_emitter->GetStartSize(), 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat("particles end size", m_emitter->GetEndSize(), 0.1f, -1.0f, 1.0f);
 	ImGui::Checkbox("particles IsDraw", &m_emitter->isDraw);
